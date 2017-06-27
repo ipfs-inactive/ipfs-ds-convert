@@ -7,21 +7,30 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"os"
 
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/pkg/errors"
+
+	ds "gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore"
+	dsq "gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore/query"
+	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
+	logging "log"
 )
 
+const LockFile = "repo.lock"
 const SuppertedRepoVersion = 6
+
+var log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
 
 // conversion holds conversion state and progress
 type conversion struct {
 	steps []string
 
-	path string
+	path     string
 	newDsDir string
 
-	dsSpec map[string]interface{}
+	dsSpec    map[string]interface{}
 	newDsSpec map[string]interface{}
 
 	oldDs Datastore
@@ -40,6 +49,12 @@ func Convert(repoPath string, newConfigPath string) error {
 		return err
 	}
 
+  unlock, err := lock.Lock(filepath.Join(c.path, LockFile))
+	if err != nil {
+		return err
+	}
+	defer unlock.Close()
+
 	err = c.loadSpecs(newConfigPath)
 	if err != nil {
 		return err
@@ -50,12 +65,21 @@ func Convert(repoPath string, newConfigPath string) error {
 		return err
 	}
 
+	log.Println("Checks OK")
+
 	err = c.openDatastores()
 	if err != nil {
 		return c.wrapErr(err)
 	}
 
-	// Copy keys
+	log.Println("Copying keys, this can take a long time")
+
+	err = c.copyKeys()
+	if err != nil {
+		return c.wrapErr(err)
+	}
+
+	log.Println("All data copied, swapping datastores")
 
 	err = c.closeDatastores()
 	if err != nil {
@@ -186,6 +210,71 @@ func (c *conversion) closeDatastores() error {
 		return errors.Wrapf(err, "error closing new datastore at %s", c.newDsDir)
 	}
 	c.addStep("close new datastore at %s", c.newDsDir)
+	return nil
+}
+
+func (c *conversion) copyKeys() error {
+	c.addStep("start copying data")
+	res, err := c.oldDs.Query(dsq.Query{})
+	if err != nil {
+		return errors.Wrapf(err, "error opening query")
+	}
+	defer res.Close()
+
+	maxBatchEntries := 1024
+	maxBatchSize := 16 << 20
+
+	curEntries := 0
+	curSize := 0
+
+	var curBatch ds.Batch
+
+	for entry := range res.Next() {
+		if entry.Error != nil {
+			return errors.Wrapf(err, "entry.Error was not nil")
+		}
+
+		if curBatch == nil {
+			curBatch, err = c.newDs.Batch()
+			if entry.Error != nil {
+				return errors.Wrapf(err, "Error creating batch")
+			}
+		}
+
+		if curBatch == nil {
+			return errors.New("batch is nil")
+		}
+
+		curBatch.Put(ds.RawKey(entry.Key), entry.Value)
+		curEntries++
+
+		bval, ok := entry.Value.([]byte)
+		if ok {
+			curSize += len(bval)
+		}
+
+		if curEntries == maxBatchEntries || curSize >= maxBatchSize {
+			err := curBatch.Commit()
+			if err != nil {
+				return errors.New("batch commit failed")
+			}
+
+			curEntries = 0
+			curSize = 0
+		}
+
+	}
+
+	if curEntries > 0 {
+		if curBatch == nil {
+			return errors.New("nil curBatch when there are unflushed entries")
+		}
+
+		err := curBatch.Commit()
+		if err != nil {
+			return errors.New("batch commit failed")
+		}
+	}
 	return nil
 }
 

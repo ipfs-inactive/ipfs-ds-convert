@@ -7,7 +7,6 @@ import (
 
 	cli "github.com/codegangsta/cli"
 	homedir "github.com/mitchellh/go-homedir"
-	log "github.com/whyrusleeping/stump"
 )
 
 const (
@@ -28,8 +27,6 @@ func main() {
 	}
 
 	app.Before = func(c *cli.Context) error {
-		log.Verbose = c.Bool("verbose")
-
 		return nil
 	}
 
@@ -59,19 +56,7 @@ IPFS_PATH environmental variable is respected
 			return errors.New("Invalid number of arguments")
 		}
 
-		baseDir := os.Getenv(EnvDir)
-		if baseDir == "" {
-			baseDir = DefaultPathRoot
-		}
-
-		baseDir, err := homedir.Expand(baseDir)
-		if err != nil {
-			return err
-		}
-
-		configFile := path.Join(baseDir, DefaultConfigFile)
-
-		_, err = os.Stat(configFile)
+		baseDir, err := getBaseDir()
 		if err != nil {
 			return err
 		}
@@ -83,4 +68,25 @@ IPFS_PATH environmental variable is respected
 
 		return Convert(baseDir, newConfigPath)
 	},
+}
+
+func getBaseDir() (string, error) {
+	baseDir := os.Getenv(EnvDir)
+	if baseDir == "" {
+		baseDir = DefaultPathRoot
+	}
+
+	baseDir, err := homedir.Expand(baseDir)
+	if err != nil {
+		return "", err
+	}
+
+	configFile := path.Join(baseDir, DefaultConfigFile)
+
+	_, err = os.Stat(configFile)
+	if err != nil {
+		return "", err
+	}
+
+	return baseDir, nil
 }
