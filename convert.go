@@ -14,6 +14,71 @@ import (
 
 const SuppertedRepoVersion = 6
 
+// conversion holds conversion state and progress
+type conversion struct {
+	steps []string
+
+	path string
+	newDsDir string
+
+	dsSpec map[string]interface{}
+	newDsSpec map[string]interface{}
+
+	oldDs Datastore
+	newDs Datastore
+}
+
+func Convert(repoPath string, newConfigPath string) error {
+	c := conversion{
+		steps: []string{},
+
+		path: repoPath,
+	}
+
+	err := c.checkRepoVersion()
+	if err != nil {
+		return err
+	}
+
+	err = c.loadSpecs(newConfigPath)
+	if err != nil {
+		return err
+	}
+
+	err = c.validateSpecs(newConfigPath)
+	if err != nil {
+		return err
+	}
+
+	err = c.openDatastores()
+	if err != nil {
+		return c.wrapErr(err)
+	}
+
+	// Copy keys
+
+	err = c.closeDatastores()
+	if err != nil {
+		return c.wrapErr(err)
+	}
+
+	// move old to another temp
+
+	// move new to repo
+
+	// open repos
+
+	// verify keys(/whole data?) integrity (opt-out)
+
+	// close repos
+
+	// transform config
+
+	// check config
+
+	return nil
+}
+
 func loadConfig(path string, out *map[string]interface{}) error {
 	cfgbytes, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -28,8 +93,8 @@ func loadConfig(path string, out *map[string]interface{}) error {
 	return nil
 }
 
-func checkRepoVersion(path string) error {
-	vstr, err := ioutil.ReadFile(filepath.Join(path, "version"))
+func (c *conversion) checkRepoVersion() error {
+	vstr, err := ioutil.ReadFile(filepath.Join(c.path, "version"))
 	if err != nil {
 		return err
 	}
@@ -46,83 +111,90 @@ func checkRepoVersion(path string) error {
 	return nil
 }
 
-func Convert(repoPath string, newConfigPath string) error {
-	steps := []string{}
-
-	err := checkRepoVersion(repoPath)
+func (c *conversion) loadSpecs(newConfigPath string) error {
+	c.newDsSpec = make(map[string]interface{})
+	err := loadConfig(newConfigPath, &c.newDsSpec)
 	if err != nil {
 		return err
 	}
-
-	// Parse config
 
 	repoConfig := make(map[string]interface{})
-	err = loadConfig(filepath.Join(repoPath, "config"), &repoConfig)
-	if err != nil {
-		return err
-	}
-
-	newDsSpec := make(map[string]interface{})
-	err = loadConfig(newConfigPath, &newDsSpec)
+	err = loadConfig(filepath.Join(c.path, "config"), &repoConfig)
 	if err != nil {
 		return err
 	}
 
 	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore' or invalid type in %s", filepath.Join(repoPath, "config"))
+		return fmt.Errorf("no 'Datastore' or invalid type in %s", filepath.Join(c.path, "config"))
 	}
 
 	dsSpec, ok := dsConfig["Spec"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(repoPath, "config"))
+		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(c.path, "config"))
 	}
 
-	// Validate config
+	c.dsSpec = dsSpec
+	return nil
+}
 
-	err = config.Validate(dsSpec)
+func (c *conversion) validateSpecs(newConfigPath string) error {
+	err := config.Validate(c.dsSpec)
 	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(repoPath, "config"))
+		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, "config"))
 	}
 
-	err = config.Validate(newDsSpec)
+	err = config.Validate(c.newDsSpec)
 	if err != nil {
 		return errors.Wrapf(err, "error validating datastore spec in %s", newConfigPath)
 	}
 
-	// Open/prepare datastores
-	oldDs, err := OpenDatastore(repoPath, dsSpec)
+	return nil
+}
+
+func (c *conversion) openDatastores() (err error) {
+	c.oldDs, err = OpenDatastore(c.path, c.dsSpec)
 	if err != nil {
-		return errors.Wrapf(err, "error opening datastore at %s", repoPath)
+		return errors.Wrapf(err, "error opening datastore at %s", c.path)
 	}
-	defer func() {
-		oldDs.Close() //TODO: check error?
-	}()
-	steps = append(steps, fmt.Sprintf("open datastore at %s", repoPath))
+	c.addStep("open datastore at %s", c.path)
 
-	newDsDir, err := ioutil.TempDir(repoPath, "ds-convert")
+	c.newDsDir, err = ioutil.TempDir(c.path, "ds-convert")
 	if err != nil {
-		return wrapErr(err, steps,"error creating temp datastore at %s", repoPath)
+		return errors.Wrapf(err, "error creating temp datastore at %s", c.path)
 	}
-	steps = append(steps, fmt.Sprintf("create temp datastore directory at %s", newDsDir))
+	c.addStep("create temp datastore directory at %s", c.newDsDir)
 
-	newDs, err := OpenDatastore(newDsDir, newDsSpec)
+	c.newDs, err = OpenDatastore(c.newDsDir, c.newDsSpec)
 	if err != nil {
-		return wrapErr(err, steps,"error opening new datastore at %s", newDsDir)
+		return errors.Wrapf(err, "error opening new datastore at %s", c.newDsDir)
 	}
-	defer func() {
-		newDs.Close() //TODO: check error?
-	}()
-	steps = append(steps, fmt.Sprintf("open new datastore at %s", newDsDir))
-
-
-
+	c.addStep("open new datastore at %s", c.newDsDir)
 
 	return nil
 }
 
-func wrapErr(err error, steps []string, format string, args ...interface{}) error {
-	s := strings.Join(steps, "\n")
+func (c *conversion) closeDatastores() error {
+	err := c.oldDs.Close()
+	if err != nil {
+		return errors.Wrapf(err, "error closing datastore at %s", c.path)
+	}
+	c.addStep("close datastore at %s", c.path)
 
-	return errors.Wrapf(err, format + "\nConversion steps done so far:\n%s", append(args, s))
+	err = c.newDs.Close()
+	if err != nil {
+		return errors.Wrapf(err, "error closing new datastore at %s", c.newDsDir)
+	}
+	c.addStep("close new datastore at %s", c.newDsDir)
+	return nil
+}
+
+func (c *conversion) addStep(format string, args ...interface{}) {
+	c.steps = append(c.steps, fmt.Sprintf(format, args))
+}
+
+func (c *conversion) wrapErr(err error) error {
+	s := strings.Join(c.steps, "\n")
+
+	return errors.Wrapf(err, "Conversion steps done so far:\n%s", s)
 }
