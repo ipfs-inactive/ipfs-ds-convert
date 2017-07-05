@@ -19,6 +19,7 @@ func init() {
 	validators["badgerds"] = badgerdsValidator
 	validators["flatfs"] = flatfsValidator
 	validators["levelds"] = leveldsValidator
+	validators["log"] = logValidator
 	validators["measure"] = measureValidator
 	validators["mount"] = mountValidator
 }
@@ -138,6 +139,20 @@ func measureValidator(ctx *validatorContext, dsConfiguration map[string]interfac
 	child, ok := dsConfiguration["child"].(map[string]interface{})
 	if !ok {
 		return errors.New("child of measure datastore has invalid type")
+	}
+
+	return validate(ctx, child)
+}
+
+func logValidator(ctx *validatorContext, dsConfiguration map[string]interface{}) error {
+	_, ok := dsConfiguration["name"].(string)
+	if !ok {
+		return errors.New("invalid 'name' in log datastore")
+	}
+
+	child, ok := dsConfiguration["child"].(map[string]interface{})
+	if !ok {
+		return errors.New("child of log datastore has invalid type")
 	}
 
 	return validate(ctx, child)
