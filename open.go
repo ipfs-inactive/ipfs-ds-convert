@@ -13,7 +13,7 @@ import (
 	mount "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/syncmount"
 
 	levelds "gx/ipfs/QmPdvXuXWAR6gtxxqZw42RtSADMwz4ijVmYHGS542b6cMz/go-ds-leveldb"
-	badgerds "gx/ipfs/QmdCcuN7cwXobs9mq8MV6YDsHNAPdexQswY9bsH3JVvBWY/go-ds-badger"
+	badgerds "gx/ipfs/QmT2Ktqcj8AMQsNwWEcoB8476mjgRR1Pony5Rw73yA2LV5/go-ds-badger"
 	ldbopts "gx/ipfs/QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g/goleveldb/leveldb/opt"
 )
 
