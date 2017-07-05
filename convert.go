@@ -12,8 +12,8 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/pkg/errors"
 
-	ds "gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore"
-	dsq "gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore/query"
+	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
+	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 	logging "log"
 )
@@ -215,7 +215,7 @@ func (c *conversion) closeDatastores() error {
 
 func (c *conversion) copyKeys() error {
 	c.addStep("start copying data")
-	res, err := c.oldDs.Query(dsq.Query{})
+	res, err := c.oldDs.Query(dsq.Query{Prefix:"/"})
 	if err != nil {
 		return errors.Wrapf(err, "error opening query")
 	}
@@ -229,9 +229,13 @@ func (c *conversion) copyKeys() error {
 
 	var curBatch ds.Batch
 
-	for entry := range res.Next() {
+	for {
+		entry, ok := res.NextSync()
 		if entry.Error != nil {
-			return errors.Wrapf(err, "entry.Error was not nil")
+			return errors.Wrapf(entry.Error, "entry.Error was not nil")
+		}
+		if !ok {
+			break
 		}
 
 		if curBatch == nil {
@@ -239,10 +243,9 @@ func (c *conversion) copyKeys() error {
 			if entry.Error != nil {
 				return errors.Wrapf(err, "Error creating batch")
 			}
-		}
-
-		if curBatch == nil {
-			return errors.New("batch is nil")
+			if curBatch == nil {
+				return errors.New("failed to create new batch")
+			}
 		}
 
 		curBatch.Put(ds.RawKey(entry.Key), entry.Value)
@@ -279,11 +282,11 @@ func (c *conversion) copyKeys() error {
 }
 
 func (c *conversion) addStep(format string, args ...interface{}) {
-	c.steps = append(c.steps, fmt.Sprintf(format, args))
+	c.steps = append(c.steps, fmt.Sprintf(format, args...))
 }
 
 func (c *conversion) wrapErr(err error) error {
 	s := strings.Join(c.steps, "\n")
 
-	return errors.Wrapf(err, "Conversion steps done so far:\n%s", s)
+	return errors.Wrapf(err, "CONVERSION ERROR\n----------\nConversion steps done so far:\n%s\n----------\n", s)
 }
