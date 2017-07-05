@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"os"
 
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/pkg/errors"
@@ -49,7 +49,7 @@ func Convert(repoPath string, newConfigPath string) error {
 		return err
 	}
 
-  unlock, err := lock.Lock(filepath.Join(c.path, LockFile))
+	unlock, err := lock.Lock(filepath.Join(c.path, LockFile))
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,9 @@ func (c *conversion) closeDatastores() error {
 
 func (c *conversion) copyKeys() error {
 	c.addStep("start copying data")
-	res, err := c.oldDs.Query(dsq.Query{Prefix:"/"})
+	//flatfs only supports KeysOnly:true
+	//TODO: try to optimize this
+	res, err := c.oldDs.Query(dsq.Query{Prefix: "/", KeysOnly: true})
 	if err != nil {
 		return errors.Wrapf(err, "error opening query")
 	}
@@ -248,10 +250,15 @@ func (c *conversion) copyKeys() error {
 			}
 		}
 
-		curBatch.Put(ds.RawKey(entry.Key), entry.Value)
+		val, err := c.oldDs.Get(ds.RawKey(entry.Key))
+		if err != nil {
+			return errors.New("get from old datastore failed")
+		}
+
+		curBatch.Put(ds.RawKey(entry.Key), val)
 		curEntries++
 
-		bval, ok := entry.Value.([]byte)
+		bval, ok := val.([]byte)
 		if ok {
 			curSize += len(bval)
 		}
