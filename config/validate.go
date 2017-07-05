@@ -1,8 +1,9 @@
 package config
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
+	"path/filepath"
 )
 
 var (
@@ -24,11 +25,18 @@ func init() {
 	validators["mount"] = mountValidator
 }
 
-func Validate(dsConfiguration map[string]interface{}) error {
+func Validate(dsConfiguration map[string]interface{}) (err error, dirs []string) {
 	ctx := validatorContext{
 		usedPaths: map[string]bool{},
 	}
-	return validate(&ctx, dsConfiguration)
+	err = validate(&ctx, dsConfiguration)
+
+	paths := make([]string, 0, len(ctx.usedPaths))
+	for k := range ctx.usedPaths {
+		paths = append(paths, k)
+	}
+
+	return err, paths
 }
 
 func validate(ctx *validatorContext, dsConfiguration map[string]interface{}) error {
@@ -51,8 +59,13 @@ func checkPath(ctx *validatorContext, p interface{}) error {
 		return errors.New("invalid 'path' type in flatfs datastore")
 	}
 
+	clean := filepath.Clean(path)
+	if clean[0] == '/' || clean[0] == '.' {
+		return errors.New("only paths inside ipfs repo are supported")
+	}
+
 	if ctx.usedPaths[path] {
-		return fmt.Errorf("Path '%s' is already in use", path)
+		return fmt.Errorf("path '%s' is already in use", path)
 	}
 
 	ctx.usedPaths[path] = true

@@ -16,6 +16,8 @@ import (
 	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 	logging "log"
+	"path"
+	"io"
 )
 
 const LockFile = "repo.lock"
@@ -29,9 +31,13 @@ type conversion struct {
 
 	path     string
 	newDsDir string
+	oldDsDir string //used after conversion
 
 	dsSpec    map[string]interface{}
 	newDsSpec map[string]interface{}
+
+	oldPaths []string
+	newPaths []string
 
 	oldDs Datastore
 	newDs Datastore
@@ -43,6 +49,8 @@ func Convert(repoPath string, newConfigPath string) error {
 
 		path: repoPath,
 	}
+
+	c.addStep("begin with tool version %s", ToolVersion)
 
 	err := c.checkRepoVersion()
 	if err != nil {
@@ -79,27 +87,45 @@ func Convert(repoPath string, newConfigPath string) error {
 		return c.wrapErr(err)
 	}
 
+	err = c.closeDatastores()
+	if err != nil {
+		return c.wrapErr(err)
+	}
+
 	log.Println("All data copied, swapping datastores")
+
+	err = c.swapDatastores()
+	if err != nil {
+		return c.wrapErr(err)
+	}
+
+	err = c.openSwappedDatastores()
+	if err != nil {
+		return c.wrapErr(err)
+	}
+
+	log.Println("Verifying key integrity")
+	verified, err := c.verifyKeys()
+	if err != nil {
+		return c.wrapErr(err)
+	}
+	log.Printf("%d keys OK\n", verified)
 
 	err = c.closeDatastores()
 	if err != nil {
 		return c.wrapErr(err)
 	}
 
-	// move old to another temp
+	log.Println("Transforming configuration file with new spec")
+	err = c.transformConfig()
+	if err != nil {
+		return c.wrapErr(err)
+	}
 
-	// move new to repo
+	//TODO: may want to check config even though there is probably little that can
+	//wrong unnoticed there
 
-	// open repos
-
-	// verify keys(/whole data?) integrity (opt-out)
-
-	// close repos
-
-	// transform config
-
-	// check config
-
+	log.Println("All tasks finished")
 	return nil
 }
 
@@ -163,15 +189,17 @@ func (c *conversion) loadSpecs(newConfigPath string) error {
 }
 
 func (c *conversion) validateSpecs(newConfigPath string) error {
-	err := config.Validate(c.dsSpec)
+	err, oldPaths := config.Validate(c.dsSpec)
 	if err != nil {
 		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, "config"))
 	}
+	c.oldPaths = oldPaths
 
-	err = config.Validate(c.newDsSpec)
+	err, newPaths := config.Validate(c.newDsSpec)
 	if err != nil {
 		return errors.Wrapf(err, "error validating datastore spec in %s", newConfigPath)
 	}
+	c.newPaths = newPaths
 
 	return nil
 }
@@ -201,15 +229,15 @@ func (c *conversion) openDatastores() (err error) {
 func (c *conversion) closeDatastores() error {
 	err := c.oldDs.Close()
 	if err != nil {
-		return errors.Wrapf(err, "error closing datastore at %s", c.path)
+		return errors.Wrapf(err, "error closing old datastore")
 	}
-	c.addStep("close datastore at %s", c.path)
+	c.addStep("close old datastore")
 
 	err = c.newDs.Close()
 	if err != nil {
-		return errors.Wrapf(err, "error closing new datastore at %s", c.newDsDir)
+		return errors.Wrapf(err, "error closing new datastore")
 	}
-	c.addStep("close new datastore at %s", c.newDsDir)
+	c.addStep("close new datastore")
 	return nil
 }
 
@@ -286,6 +314,139 @@ func (c *conversion) copyKeys() error {
 		}
 	}
 	return nil
+}
+
+func (c *conversion) swapDatastores() (err error) {
+	c.oldDsDir, err = ioutil.TempDir(c.path, "ds-convert-old")
+	if err != nil {
+		return errors.Wrapf(err, "error creating temp datastore at %s", c.path)
+	}
+	c.addStep("create temp datastore directory at %s", c.oldDsDir)
+
+	//TODO: Check if old dirs aren't mount points
+	for _, dir := range c.oldPaths {
+		err := os.Rename(path.Join(c.path, dir), path.Join(c.oldDsDir, dir))
+		if err != nil {
+			return errors.Wrapf(err, "error moving old datastore dir %s to %s", dir, c.oldDsDir)
+		}
+		c.addStep("> move %s to %s", path.Join(c.path, dir), path.Join(c.oldDsDir, dir))
+
+		//Those are theoretically not needed, but having them won't hurt
+		if _, err := os.Stat(path.Join(c.path, dir)); !os.IsNotExist(err) {
+			return fmt.Errorf("failed to move old datastore dir %s from %s", dir, c.path)
+		}
+
+		if s, err := os.Stat(path.Join(c.oldDsDir, dir)); err != nil || !s.IsDir() {
+			return fmt.Errorf("failed to move old datastore dir %s to %s", dir, c.oldDsDir)
+		}
+	}
+	c.addStep("move old DS to %s", c.oldDsDir)
+
+	for _, dir := range c.newPaths {
+		err := os.Rename(path.Join(c.newDsDir, dir), path.Join(c.path, dir))
+		if err != nil {
+			return errors.Wrapf(err, "error moving new datastore dir %s from %s", dir, c.newDsDir)
+		}
+		c.addStep("> move %s to %s", path.Join(c.newDsDir, dir), path.Join(c.path, dir))
+	}
+	c.addStep("move new DS from %s", c.oldDsDir)
+
+	//check if newDs dir is empty
+	dir, err := os.Open(c.newDsDir)
+	if err != nil {
+		return errors.Wrapf(err, "failed to open %s", c.newDsDir)
+	}
+
+	_, err = dir.Readdirnames(1)
+	if err != io.EOF {
+		dir.Close()
+		return fmt.Errorf("%s was not empty after swapping repos", c.newDsDir)
+	}
+	dir.Close()
+
+	err = os.Remove(c.newDsDir)
+	if err != nil {
+		return fmt.Errorf("failed to remove newDs temp directory after swapping repos")
+	}
+
+	c.addStep("remove temp newDs directory %s", c.newDsDir)
+
+	return nil
+}
+
+func (c *conversion) openSwappedDatastores() (err error) {
+	c.oldDs, err = OpenDatastore(c.oldDsDir, c.dsSpec)
+	if err != nil {
+		return errors.Wrapf(err, "error opening datastore at %s", c.oldDsDir)
+	}
+	c.addStep("open datastore at %s", c.oldDsDir)
+
+	c.newDs, err = OpenDatastore(c.path, c.newDsSpec)
+	if err != nil {
+		return errors.Wrapf(err, "error opening new datastore at %s", c.path)
+	}
+	c.addStep("open new datastore at %s", c.path)
+
+	return nil
+}
+
+func (c *conversion) verifyKeys() (n int, err error) {
+	c.addStep("verify keys")
+
+	res, err := c.oldDs.Query(dsq.Query{Prefix: "/", KeysOnly: true})
+	if err != nil {
+		return n, errors.Wrapf(err, "error opening query")
+	}
+	defer res.Close()
+
+	for {
+		entry, ok := res.NextSync()
+		if entry.Error != nil {
+			return n, errors.Wrapf(entry.Error, "entry.Error was not nil")
+		}
+		if !ok {
+			break
+		}
+
+		has, err := c.newDs.Has(ds.RawKey(entry.Key))
+		if err != nil {
+			return n, errors.Wrapf(err, "newDs.Has returned error")
+		}
+
+		if !has {
+			return n, fmt.Errorf("Key %s was nor present in new datastore", entry.Key)
+		}
+
+		n++
+	}
+
+	return n, nil
+}
+
+func (c *conversion) transformConfig() (err error) {
+	configPath := filepath.Join(c.path, "config")
+	repoConfig := make(map[string]interface{})
+	err = loadConfig(configPath, &repoConfig)
+	if err != nil {
+		return err
+	}
+
+	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("no 'Datastore' or invalid type in %s", configPath)
+	}
+
+	_, ok = dsConfig["Spec"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", configPath)
+	}
+
+	dsConfig["Spec"] = c.newDsSpec
+
+	b, err := json.MarshalIndent(repoConfig, "", "  ")
+	ioutil.WriteFile(configPath, b, 0660)
+
+	return err
 }
 
 func (c *conversion) addStep(format string, args ...interface{}) {

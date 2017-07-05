@@ -14,6 +14,8 @@ const (
 	DefaultPathRoot   = "~/" + DefaultPathName
 	DefaultConfigFile = "config"
 	EnvDir            = "IPFS_PATH"
+
+	ToolVersion = "0.0.1"
 )
 
 func main() {
