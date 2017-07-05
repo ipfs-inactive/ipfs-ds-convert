@@ -3,11 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	logging "log"
 
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/pkg/errors"
@@ -15,9 +19,6 @@ import (
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
-	logging "log"
-	"path"
-	"io"
 )
 
 const LockFile = "repo.lock"
@@ -45,8 +46,6 @@ type conversion struct {
 
 func Convert(repoPath string, newConfigPath string) error {
 	c := conversion{
-		steps: []string{},
-
 		path: repoPath,
 	}
 
@@ -123,7 +122,7 @@ func Convert(repoPath string, newConfigPath string) error {
 	}
 
 	//TODO: may want to check config even though there is probably little that can
-	//wrong unnoticed there
+	//go wrong unnoticed there
 
 	log.Println("All tasks finished")
 	return nil
@@ -189,13 +188,13 @@ func (c *conversion) loadSpecs(newConfigPath string) error {
 }
 
 func (c *conversion) validateSpecs(newConfigPath string) error {
-	err, oldPaths := config.Validate(c.dsSpec)
+	oldPaths, err := config.Validate(c.dsSpec)
 	if err != nil {
 		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, "config"))
 	}
 	c.oldPaths = oldPaths
 
-	err, newPaths := config.Validate(c.newDsSpec)
+	newPaths, err := config.Validate(c.newDsSpec)
 	if err != nil {
 		return errors.Wrapf(err, "error validating datastore spec in %s", newConfigPath)
 	}

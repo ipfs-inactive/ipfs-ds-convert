@@ -1,0 +1,60 @@
+{
+  "author": "magik6k",
+  "bugs": {
+    "url": "https://github.com/ipfs/go-ds-badger"
+  },
+  "gx": {
+    "dvcsimport": "github.com/ipfs/ipfs-ds-convert"
+  },
+  "gxDependencies": [
+    {
+      "author": "jbenet",
+      "hash": "QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG",
+      "name": "go-datastore",
+      "version": "1.2.2"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmUTshC2PP4ZDqkrFfDU4JGJFMWjYnunxPgkQ6ZCA2hGqh",
+      "name": "go-ds-flatfs",
+      "version": "1.1.4"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmSb95iHExSSb47zpmyn5CyY5PZidVWSjyKyDqgYQrnKor",
+      "name": "go-ds-measure",
+      "version": "1.2.2"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmPdvXuXWAR6gtxxqZw42RtSADMwz4ijVmYHGS542b6cMz",
+      "name": "go-ds-leveldb",
+      "version": "1.0.3"
+    },
+    {
+      "author": "magik6k",
+      "hash": "QmUsmv4qNLYQemYzr7aciEYTzBZakYVsXkeHWKvxmEEGgF",
+      "name": "go-ds-badger",
+      "version": "0.1.1"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe",
+      "name": "lock",
+      "version": "0.0.0"
+    },
+    {
+      "author": "syndtr",
+      "hash": "QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g",
+      "name": "goleveldb",
+      "version": "0.0.1"
+    }
+  ],
+  "gxVersion": "0.10.0",
+  "language": "go",
+  "license": "MIT",
+  "name": "ipfs-ds-convert",
+  "releaseCmd": "git commit -a -m \"gx publish $VERSION\"",
+  "version": "0.0.0"
+}
+

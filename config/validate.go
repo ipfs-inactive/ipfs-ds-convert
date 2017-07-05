@@ -25,7 +25,7 @@ func init() {
 	validators["mount"] = mountValidator
 }
 
-func Validate(dsConfiguration map[string]interface{}) (err error, dirs []string) {
+func Validate(dsConfiguration map[string]interface{}) (dirs []string, err error) {
 	ctx := validatorContext{
 		usedPaths: map[string]bool{},
 	}
@@ -36,7 +36,7 @@ func Validate(dsConfiguration map[string]interface{}) (err error, dirs []string)
 		paths = append(paths, k)
 	}
 
-	return err, paths
+	return paths, err
 }
 
 func validate(ctx *validatorContext, dsConfiguration map[string]interface{}) error {

@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"sort"
+)
 
 var (
 	TestSpec = map[string]interface{}{
@@ -42,9 +45,21 @@ var (
 )
 
 func TestValidate(t *testing.T) {
-	err := Validate(TestSpec)
+	dirs, err := Validate(TestSpec)
 	if err != nil {
 		t.Errorf("Should not return error: %s", err)
+	}
+
+	sort.Strings(dirs)
+
+	if dirs[0] != "badgerDatastore" {
+		t.Errorf(`dirs[0] != "badgerDatastore" got %s `, dirs[0])
+	}
+	if dirs[1] != "blocks" {
+		t.Errorf(`dirs[0] != "blocks" got %s `, dirs[1])
+	}
+	if dirs[2] != "levelDatastore" {
+		t.Errorf(`dirs[0] != "levelDatastore" got %s `, dirs[2])
 	}
 
 	//TODO: better coverage
