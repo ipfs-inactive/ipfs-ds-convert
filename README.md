@@ -6,10 +6,10 @@ This tool is WIP and may damage your data. Make sure to backup first.
 
 TODO:
 - [x] Finish basic conversion code
-- [ ] package.json for gx
+- [x] package.json for gx
 - [ ] Tests
   - [ ] Sharness
-  - [ ] CI
+  - [x] CI
   - [ ] Coverage > 80% or more
 - [ ] Review
 - [ ] Standard readme
