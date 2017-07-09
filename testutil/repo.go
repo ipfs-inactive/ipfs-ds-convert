@@ -5,8 +5,11 @@ import (
 
 	config "github.com/ipfs/go-ipfs/repo/config"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
+	convert "github.com/ipfs/ipfs-ds-convert/convert"
 	"io/ioutil"
 	"os"
+	"fmt"
+	"encoding/json"
 )
 
 func NewTestRepo(t *testing.T) (string, func(t *testing.T)) {
@@ -35,4 +38,35 @@ func NewTestRepo(t *testing.T) (string, func(t *testing.T)) {
 			t.Fatal(err)
 		}
 	}
+}
+
+func PatchConfig(configPath string, newSpecPath string) error {
+	newSpec := make(map[string]interface{})
+	err := convert.LoadConfig(newSpecPath, &newSpec)
+	if err != nil {
+		return err
+	}
+
+	repoConfig := make(map[string]interface{})
+	err = convert.LoadConfig(configPath, &repoConfig)
+	if err != nil {
+		return err
+	}
+
+	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("no 'Datastore' or invalid type in %s", configPath)
+	}
+
+	_, ok = dsConfig["Spec"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", configPath)
+	}
+
+	dsConfig["Spec"] = newSpec
+
+	b, err := json.MarshalIndent(repoConfig, "", "  ")
+	ioutil.WriteFile(configPath, b, 0660)
+
+	return nil
 }

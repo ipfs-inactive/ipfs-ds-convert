@@ -13,11 +13,12 @@
     },
     {
       "child": {
-        "path": "badgerstore",
-        "type": "badgerds"
+        "compression": "none",
+        "path": "datastore",
+        "type": "levelds"
       },
       "mountpoint": "/",
-      "prefix": "badgerdb.datastore",
+      "prefix": "leveldb.datastore",
       "type": "measure"
     }
   ],

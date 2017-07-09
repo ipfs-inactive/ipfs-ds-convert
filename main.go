@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"os"
 	"path"
 
 	cli "github.com/codegangsta/cli"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/ipfs/ipfs-ds-convert/convert"
 )
 
 const (
@@ -14,8 +14,6 @@ const (
 	DefaultPathRoot   = "~/" + DefaultPathName
 	DefaultConfigFile = "config"
 	EnvDir            = "IPFS_PATH"
-
-	ToolVersion = "0.0.1"
 )
 
 func main() {
@@ -37,38 +35,25 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		convert.Log.Fatal(err)
 	}
 }
 
 var ConvertCommand = cli.Command{
 	Name:      "convert",
 	Usage:     "convert datastore setup",
-	ArgsUsage: "[new config]",
 	Description: `'convert' converts existing ipfs datastore setup to another based on the
-provided configuration, moving all data in the process.
-
-[new config] is a json file containing only the datastore part of ipfs
-configuration
+ipfs configuration and repo specs.
 
 IPFS_PATH environmental variable is respected
 	`,
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) != 1 {
-			return errors.New("Invalid number of arguments")
-		}
-
 		baseDir, err := getBaseDir()
 		if err != nil {
 			return err
 		}
 
-		newConfigPath, err := homedir.Expand(c.Args()[0])
-		if err != nil {
-			return err
-		}
-
-		return Convert(baseDir, newConfigPath)
+		return convert.Convert(baseDir)
 	},
 }
 

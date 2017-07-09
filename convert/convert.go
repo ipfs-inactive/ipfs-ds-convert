@@ -1,4 +1,4 @@
-package main
+package convert
 
 import (
 	"encoding/json"
@@ -21,10 +21,16 @@ import (
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 )
 
-const LockFile = "repo.lock"
-const SuppertedRepoVersion = 6
+const (
+	LockFile             = "repo.lock"
+	ConfigFile           = "config"
+	SpecsFile            = "spec"
 
-var log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
+	SuppertedRepoVersion = 6
+	ToolVersion = "0.0.1"
+)
+
+var Log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
 
 // conversion holds conversion state and progress
 type conversion struct {
@@ -44,7 +50,7 @@ type conversion struct {
 	newDs Datastore
 }
 
-func Convert(repoPath string, newConfigPath string) error {
+func Convert(repoPath string) error {
 	c := conversion{
 		path: repoPath,
 	}
@@ -62,24 +68,24 @@ func Convert(repoPath string, newConfigPath string) error {
 	}
 	defer unlock.Close()
 
-	err = c.loadSpecs(newConfigPath)
+	err = c.loadSpecs()
 	if err != nil {
 		return err
 	}
 
-	err = c.validateSpecs(newConfigPath)
+	err = c.validateSpecs()
 	if err != nil {
 		return err
 	}
 
-	log.Println("Checks OK")
+	Log.Println("Checks OK")
 
 	err = c.openDatastores()
 	if err != nil {
 		return c.wrapErr(err)
 	}
 
-	log.Println("Copying keys, this can take a long time")
+	Log.Println("Copying keys, this can take a long time")
 
 	err = c.copyKeys()
 	if err != nil {
@@ -91,7 +97,7 @@ func Convert(repoPath string, newConfigPath string) error {
 		return c.wrapErr(err)
 	}
 
-	log.Println("All data copied, swapping datastores")
+	Log.Println("All data copied, swapping datastores")
 
 	err = c.swapDatastores()
 	if err != nil {
@@ -103,20 +109,20 @@ func Convert(repoPath string, newConfigPath string) error {
 		return c.wrapErr(err)
 	}
 
-	log.Println("Verifying key integrity")
+	Log.Println("Verifying key integrity")
 	verified, err := c.verifyKeys()
 	if err != nil {
 		return c.wrapErr(err)
 	}
-	log.Printf("%d keys OK\n", verified)
+	Log.Printf("%d keys OK\n", verified)
 
 	err = c.closeDatastores()
 	if err != nil {
 		return c.wrapErr(err)
 	}
 
-	log.Println("Transforming configuration file with new spec")
-	err = c.transformConfig()
+	Log.Println("Saving new spec")
+	err = c.saveNewSpec()
 	if err != nil {
 		return c.wrapErr(err)
 	}
@@ -124,11 +130,11 @@ func Convert(repoPath string, newConfigPath string) error {
 	//TODO: may want to check config even though there is probably little that can
 	//go wrong unnoticed there
 
-	log.Println("All tasks finished")
+	Log.Println("All tasks finished")
 	return nil
 }
 
-func loadConfig(path string, out *map[string]interface{}) error {
+func LoadConfig(path string, out *map[string]interface{}) error {
 	cfgbytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -160,43 +166,49 @@ func (c *conversion) checkRepoVersion() error {
 	return nil
 }
 
-func (c *conversion) loadSpecs(newConfigPath string) error {
-	c.newDsSpec = make(map[string]interface{})
-	err := loadConfig(newConfigPath, &c.newDsSpec)
+func (c *conversion) loadSpecs() error {
+	oldSpec := make(map[string]interface{})
+	err := LoadConfig(filepath.Join(c.path, SpecsFile), &oldSpec)
 	if err != nil {
 		return err
 	}
 
+	curSpec, ok := oldSpec["spec"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("no 'spec' or invalid type in %s", filepath.Join(c.path, SpecsFile))
+	}
+	c.dsSpec = curSpec
+
 	repoConfig := make(map[string]interface{})
-	err = loadConfig(filepath.Join(c.path, "config"), &repoConfig)
+	err = LoadConfig(filepath.Join(c.path, ConfigFile), &repoConfig)
 	if err != nil {
 		return err
 	}
 
 	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore' or invalid type in %s", filepath.Join(c.path, "config"))
+		return fmt.Errorf("no 'Datastore' or invalid type in %s", filepath.Join(c.path, ConfigFile))
 	}
 
 	dsSpec, ok := dsConfig["Spec"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(c.path, "config"))
+		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(c.path, ConfigFile))
 	}
 
-	c.dsSpec = dsSpec
+	c.newDsSpec = dsSpec
 	return nil
 }
 
-func (c *conversion) validateSpecs(newConfigPath string) error {
+func (c *conversion) validateSpecs() error {
 	oldPaths, err := config.Validate(c.dsSpec)
 	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, "config"))
+		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, SpecsFile))
 	}
 	c.oldPaths = oldPaths
 
 	newPaths, err := config.Validate(c.newDsSpec)
 	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", newConfigPath)
+		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, ConfigFile))
 	}
 	c.newPaths = newPaths
 
@@ -422,30 +434,20 @@ func (c *conversion) verifyKeys() (n int, err error) {
 	return n, nil
 }
 
-func (c *conversion) transformConfig() (err error) {
-	configPath := filepath.Join(c.path, "config")
-	repoConfig := make(map[string]interface{})
-	err = loadConfig(configPath, &repoConfig)
+func (c *conversion) saveNewSpec() (err error) {
+/*	specsPath := filepath.Join(c.path, SpecsFile)
+
+	b, err := json.Marshal(c.newDsSpec)
 	if err != nil {
 		return err
 	}
 
-	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("no 'Datastore' or invalid type in %s", configPath)
-	}
+	err = ioutil.WriteFile(specsPath, b, 0660)
+	if err != nil {
+		return err
+	}*/
 
-	_, ok = dsConfig["Spec"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", configPath)
-	}
-
-	dsConfig["Spec"] = c.newDsSpec
-
-	b, err := json.MarshalIndent(repoConfig, "", "  ")
-	ioutil.WriteFile(configPath, b, 0660)
-
-	return err
+	return errors.New("saveNewSpec: TODO")
 }
 
 func (c *conversion) addStep(format string, args ...interface{}) {
