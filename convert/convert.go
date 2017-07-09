@@ -435,9 +435,14 @@ func (c *conversion) verifyKeys() (n int, err error) {
 }
 
 func (c *conversion) saveNewSpec() (err error) {
-/*	specsPath := filepath.Join(c.path, SpecsFile)
+	specs := map[string]interface{}{
+		"id": DatastoreId(c.newDsSpec),
+		"spec": c.newDsSpec,
+	}
 
-	b, err := json.Marshal(c.newDsSpec)
+	specsPath := filepath.Join(c.path, SpecsFile)
+
+	b, err := json.Marshal(specs)
 	if err != nil {
 		return err
 	}
@@ -445,9 +450,9 @@ func (c *conversion) saveNewSpec() (err error) {
 	err = ioutil.WriteFile(specsPath, b, 0660)
 	if err != nil {
 		return err
-	}*/
+	}
 
-	return errors.New("saveNewSpec: TODO")
+	return nil
 }
 
 func (c *conversion) addStep(format string, args ...interface{}) {

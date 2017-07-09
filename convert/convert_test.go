@@ -10,15 +10,15 @@ import (
 
 func TestBasicConvert(t *testing.T) {
 	//Prepare repo
-	dir, _close := testutil.NewTestRepo(t)
-	defer _close(t)
+	dir, _ := testutil.NewTestRepo(t)
+	//defer _close(t)
 
 	r, err := testutil.OpenRepo(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = testutil.InsertRandomKeys("", 50, r)
+	err = testutil.InsertRandomKeys("", 10000, r)
 	if err != nil {
 		t.Fatal(err)
 	}
