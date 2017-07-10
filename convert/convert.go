@@ -13,21 +13,20 @@ import (
 
 	logging "log"
 
-	"github.com/ipfs/ipfs-ds-convert/config"
-	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
-
+	config "github.com/ipfs/ipfs-ds-convert/config"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
+	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 )
 
 const (
-	LockFile             = "repo.lock"
-	ConfigFile           = "config"
-	SpecsFile            = "spec"
+	LockFile   = "repo.lock"
+	ConfigFile = "config"
+	SpecsFile  = "spec"
 
 	SuppertedRepoVersion = 6
-	ToolVersion = "0.0.1"
+	ToolVersion          = "0.0.1"
 )
 
 var Log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
@@ -436,7 +435,7 @@ func (c *conversion) verifyKeys() (n int, err error) {
 
 func (c *conversion) saveNewSpec() (err error) {
 	specs := map[string]interface{}{
-		"id": DatastoreId(c.newDsSpec),
+		"id":   DatastoreId(c.newDsSpec),
 		"spec": c.newDsSpec,
 	}
 

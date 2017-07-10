@@ -1,15 +1,15 @@
 package testutil
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	config "github.com/ipfs/go-ipfs/repo/config"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	convert "github.com/ipfs/ipfs-ds-convert/convert"
-	"io/ioutil"
-	"os"
-	"fmt"
-	"encoding/json"
 )
 
 func NewTestRepo(t *testing.T) (string, func(t *testing.T)) {

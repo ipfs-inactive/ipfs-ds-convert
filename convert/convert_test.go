@@ -10,8 +10,8 @@ import (
 
 func TestBasicConvert(t *testing.T) {
 	//Prepare repo
-	dir, _ := testutil.NewTestRepo(t)
-	//defer _close(t)
+	dir, _close := testutil.NewTestRepo(t)
+	defer _close(t)
 
 	r, err := testutil.OpenRepo(dir)
 	if err != nil {
@@ -28,7 +28,7 @@ func TestBasicConvert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testutil.PatchConfig(path.Join(dir, "config"), "testfiles/badgerSpec")
+	err = testutil.PatchConfig(path.Join(dir, "config"), "../testfiles/badgerSpec")
 	if err != nil {
 		t.Fatal(err)
 	}

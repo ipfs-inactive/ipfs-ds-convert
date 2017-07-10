@@ -1,13 +1,14 @@
 package testutil
 
 import (
-	repo "github.com/ipfs/go-ipfs/repo"
-	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
+	"encoding/base32"
+	"fmt"
 	"math/rand"
 
-	"fmt"
+	repo "github.com/ipfs/go-ipfs/repo"
+	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
+
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	"encoding/base32"
 )
 
 func OpenRepo(repoPath string) (repo.Repo, error) {
