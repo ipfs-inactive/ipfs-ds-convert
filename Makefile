@@ -19,6 +19,9 @@ publish:
 	gx-go rewrite --undo
 
 test: deps
+	go test ./...
+
+circle: deps
 	go vet
 	$(eval PKGS := $(shell go list ./...))
 	$(eval PKGS_DELIM := $(shell echo $(PKGS) | sed -e 's/ /,/g'))

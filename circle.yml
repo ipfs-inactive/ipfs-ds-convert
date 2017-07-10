@@ -30,5 +30,5 @@ dependencies:
 
 test:
   override:
-    - make test:
+    - make circle:
         pwd: "../.go_workspace/src/$IMPORT_PATH"
