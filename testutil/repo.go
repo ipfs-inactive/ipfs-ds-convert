@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	config "github.com/ipfs/go-ipfs/repo/config"
-	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	convert "github.com/ipfs/ipfs-ds-convert/convert"
+	config "gx/ipfs/QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V/go-ipfs/repo/config"
+	fsrepo "gx/ipfs/QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V/go-ipfs/repo/fsrepo"
 )
 
 func NewTestRepo(t *testing.T) (string, func(t *testing.T)) {

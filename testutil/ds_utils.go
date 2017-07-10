@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"math/rand"
 
-	repo "github.com/ipfs/go-ipfs/repo"
-	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
+	repo "gx/ipfs/QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V/go-ipfs/repo"
+	fsrepo "gx/ipfs/QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V/go-ipfs/repo/fsrepo"
 
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	"bytes"
+	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 )
 
 func OpenRepo(repoPath string) (repo.Repo, error) {
@@ -44,7 +44,7 @@ func InsertRandomKeys(prefix string, n int, r repo.Repo) (int64, error) {
 			return 0, err
 		}
 
-		if (i + 1) % 127 == 0 {
+		if (i+1)%127 == 0 {
 			err := batch.Commit()
 			if err != nil {
 				return 0, err

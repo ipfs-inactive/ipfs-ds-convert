@@ -54,6 +54,11 @@
       "hash": "QmPP91WFAb8LCs8EMzGvDPPvg1kacbqRkoxgTTnUsZckGe",
       "name": "retry-datastore",
       "version": "1.1.4"
+    },
+    {
+      "hash": "QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V",
+      "name": "go-ipfs",
+      "version": "0.4.11-dev"
     }
   ],
   "gxVersion": "0.10.0",
