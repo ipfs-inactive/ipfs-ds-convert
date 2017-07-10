@@ -304,7 +304,7 @@ func (c *conversion) copyKeys() error {
 		if curEntries == maxBatchEntries || curSize >= maxBatchSize {
 			err := curBatch.Commit()
 			if err != nil {
-				return errors.New("batch commit failed")
+				return errors.Wrapf(err,"batch commit failed")
 			}
 
 			curEntries = 0
@@ -320,7 +320,7 @@ func (c *conversion) copyKeys() error {
 
 		err := curBatch.Commit()
 		if err != nil {
-			return errors.New("batch commit failed")
+			return errors.Wrapf(err,"batch commit failed")
 		}
 	}
 	return nil

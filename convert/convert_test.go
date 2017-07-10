@@ -21,7 +21,7 @@ func prepareTest(t *testing.T) (string, func(t *testing.T), int64, int64) {
 		t.Fatal(err)
 	}
 
-	seed2, err := testutil.InsertRandomKeys("blocks/", 10000, r)
+	seed2, err := testutil.InsertRandomKeys("blocks/", 4000, r)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func finishTest(t *testing.T, dir string, seed1, seed2 int64) {
 		t.Fatal(err)
 	}
 
-	err = testutil.Verify("blocks/", 10000, seed2, r)
+	err = testutil.Verify("blocks/", 4000, seed2, r)
 	if err != nil {
 		t.Fatal(err)
 	}

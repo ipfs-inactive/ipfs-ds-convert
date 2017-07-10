@@ -48,6 +48,12 @@
       "hash": "QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g",
       "name": "goleveldb",
       "version": "0.0.1"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmPP91WFAb8LCs8EMzGvDPPvg1kacbqRkoxgTTnUsZckGe",
+      "name": "retry-datastore",
+      "version": "1.1.4"
     }
   ],
   "gxVersion": "0.10.0",

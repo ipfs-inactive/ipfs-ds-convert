@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"syscall"
+	"time"
 
 	measure "gx/ipfs/QmSb95iHExSSb47zpmyn5CyY5PZidVWSjyKyDqgYQrnKor/go-ds-measure"
 	flatfs "gx/ipfs/QmUTshC2PP4ZDqkrFfDU4JGJFMWjYnunxPgkQ6ZCA2hGqh/go-ds-flatfs"
@@ -13,6 +15,7 @@ import (
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	mount "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/syncmount"
 
+	retry "gx/ipfs/QmPP91WFAb8LCs8EMzGvDPPvg1kacbqRkoxgTTnUsZckGe/retry-datastore"
 	levelds "gx/ipfs/QmPdvXuXWAR6gtxxqZw42RtSADMwz4ijVmYHGS542b6cMz/go-ds-leveldb"
 	badgerds "gx/ipfs/QmTC7BY2viSAbPbGte6NyMZJCC2xheaRBYKEn4BuzTxe7W/go-ds-badger"
 	ldbopts "gx/ipfs/QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g/goleveldb/leveldb/opt"
@@ -25,12 +28,46 @@ type Datastore interface {
 	io.Closer
 }
 
+type Retry struct {
+	*retry.Datastore
+	io.Closer
+}
+
+func (ds *Retry) Close() error {
+	return ds.Batching.(Datastore).Close()
+}
+
+func isTooManyFDError(err error) bool {
+	perr, ok := err.(*os.PathError)
+	if ok && perr.Err == syscall.EMFILE {
+		return true
+	}
+
+	return false
+}
+
 func OpenDatastore(path string, params map[string]interface{}) (Datastore, error) {
 	dsc, err := AnyDatastoreConfig(params)
 	if err != nil {
 		return nil, err
 	}
-	return dsc.Create(path)
+
+	d, err := dsc.Create(path)
+	if err != nil {
+		return nil, err
+	}
+
+	rds := &retry.Datastore{
+		Batching:    d,
+		Delay:       time.Millisecond * 200,
+		Retries:     6,
+		TempErrFunc: isTooManyFDError,
+	}
+
+	return &Retry{
+		Datastore: rds,
+		Closer:    d,
+	}, nil
 }
 
 func DatastoreId(params map[string]interface{}) string {
