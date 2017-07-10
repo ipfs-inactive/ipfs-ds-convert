@@ -40,33 +40,31 @@ func NewTestRepo(t *testing.T) (string, func(t *testing.T)) {
 	}
 }
 
-func PatchConfig(configPath string, newSpecPath string) error {
+func PatchConfig(t *testing.T, configPath string, newSpecPath string) {
 	newSpec := make(map[string]interface{})
 	err := convert.LoadConfig(newSpecPath, &newSpec)
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
 
 	repoConfig := make(map[string]interface{})
 	err = convert.LoadConfig(configPath, &repoConfig)
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
 
 	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore' or invalid type in %s", configPath)
+		t.Fatal(fmt.Errorf("no 'Datastore' or invalid type in %s", configPath))
 	}
 
 	_, ok = dsConfig["Spec"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", configPath)
+		t.Fatal(fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", configPath))
 	}
 
 	dsConfig["Spec"] = newSpec
 
 	b, err := json.MarshalIndent(repoConfig, "", "  ")
 	ioutil.WriteFile(configPath, b, 0660)
-
-	return nil
 }

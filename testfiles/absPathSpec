@@ -1,0 +1,10 @@
+{
+  "child": {
+    "compression": "none",
+    "path": "/srv/datastore",
+    "type": "levelds"
+  },
+  "mountpoint": "/",
+  "prefix": "leveldb.datastore",
+  "type": "measure"
+}

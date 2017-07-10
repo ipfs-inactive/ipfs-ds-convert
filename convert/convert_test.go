@@ -8,7 +8,7 @@ import (
 	testutil "github.com/ipfs/ipfs-ds-convert/testutil"
 )
 
-func prepareTest(t *testing.T) (string, func(t *testing.T), int64, int64) {
+func prepareTest(t *testing.T, keys, blocks int) (string, func(t *testing.T), int64, int64) {
 	dir, _close := testutil.NewTestRepo(t)
 
 	r, err := testutil.OpenRepo(dir)
@@ -16,12 +16,12 @@ func prepareTest(t *testing.T) (string, func(t *testing.T), int64, int64) {
 		t.Fatal(err)
 	}
 
-	seed1, err := testutil.InsertRandomKeys("", 3000, r)
+	seed1, err := testutil.InsertRandomKeys("", keys, r)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	seed2, err := testutil.InsertRandomKeys("blocks/", 4000, r)
+	seed2, err := testutil.InsertRandomKeys("blocks/", blocks, r)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,19 +34,19 @@ func prepareTest(t *testing.T) (string, func(t *testing.T), int64, int64) {
 	return dir, _close, seed1, seed2
 }
 
-func finishTest(t *testing.T, dir string, seed1, seed2 int64) {
+func finishTest(t *testing.T, dir string, seed1, seed2 int64, keys, blocks int) {
 	//Test if repo can be opened
 	r, err := testutil.OpenRepo(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = testutil.Verify("", 3000, seed1, r)
+	err = testutil.Verify("", keys, seed1, r)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = testutil.Verify("blocks/", 4000, seed2, r)
+	err = testutil.Verify("blocks/", blocks, seed2, r)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,19 +59,16 @@ func finishTest(t *testing.T, dir string, seed1, seed2 int64) {
 
 func TestBasicConvert(t *testing.T) {
 	//Prepare repo
-	dir, _close, s1, s2 := prepareTest(t)
+	dir, _close, s1, s2 := prepareTest(t, 3000, 10000)
 	defer _close(t)
 
-	err := testutil.PatchConfig(path.Join(dir, "config"), "../testfiles/badgerSpec")
-	if err != nil {
-		t.Fatal(err)
-	}
+	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/badgerSpec")
 
 	//Convert!
-	err = convert.Convert(dir)
+	err := convert.Convert(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	finishTest(t, dir, s1, s2)
+	finishTest(t, dir, s1, s2, 3000, 10000)
 }
