@@ -8,17 +8,20 @@ import (
 	testutil "github.com/ipfs/ipfs-ds-convert/testutil"
 )
 
-func TestBasicConvert(t *testing.T) {
-	//Prepare repo
+func prepareTest(t *testing.T) (string, func(t *testing.T), int64, int64) {
 	dir, _close := testutil.NewTestRepo(t)
-	defer _close(t)
 
 	r, err := testutil.OpenRepo(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = testutil.InsertRandomKeys("", 10000, r)
+	seed1, err := testutil.InsertRandomKeys("", 3000, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	seed2, err := testutil.InsertRandomKeys("blocks/", 10000, r)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +31,38 @@ func TestBasicConvert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testutil.PatchConfig(path.Join(dir, "config"), "../testfiles/badgerSpec")
+	return dir, _close, seed1, seed2
+}
+
+func finishTest(t *testing.T, dir string, seed1, seed2 int64) {
+	//Test if repo can be opened
+	r, err := testutil.OpenRepo(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testutil.Verify("", 3000, seed1, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testutil.Verify("blocks/", 10000, seed2, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = r.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestBasicConvert(t *testing.T) {
+	//Prepare repo
+	dir, _close, s1, s2 := prepareTest(t)
+	defer _close(t)
+
+	err := testutil.PatchConfig(path.Join(dir, "config"), "../testfiles/badgerSpec")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,14 +73,5 @@ func TestBasicConvert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	//Test if repo can be opened
-	r, err = testutil.OpenRepo(dir)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = r.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+	finishTest(t, dir, s1, s2)
 }
