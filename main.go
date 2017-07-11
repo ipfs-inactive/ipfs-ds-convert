@@ -4,9 +4,9 @@ import (
 	"os"
 	"path"
 
-	cli "github.com/codegangsta/cli"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/ipfs/ipfs-ds-convert/convert"
+	homedir "github.com/mitchellh/go-homedir"
+	cli "gx/ipfs/QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K/cli"
 )
 
 const (
@@ -40,8 +40,8 @@ func main() {
 }
 
 var ConvertCommand = cli.Command{
-	Name:      "convert",
-	Usage:     "convert datastore setup",
+	Name:  "convert",
+	Usage: "convert datastore setup",
 	Description: `'convert' converts existing ipfs datastore setup to another based on the
 ipfs configuration and repo specs.
 

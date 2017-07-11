@@ -8,12 +8,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
-	"strings"
 
 	logging "log"
 
-	config "github.com/ipfs/ipfs-ds-convert/config"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
@@ -31,6 +28,15 @@ const (
 
 var Log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
 
+type StageCtx struct {
+	repoPath string
+}
+
+type ConversionStage interface {
+	apply(*StageCtx) error
+	unapply(*StageCtx) error
+}
+
 // conversion holds conversion state and progress
 type conversion struct {
 	steps []string
@@ -44,6 +50,8 @@ type conversion struct {
 
 	oldPaths []string
 	newPaths []string
+
+	strategy []ConversionStage
 
 	oldDs Datastore
 	newDs Datastore
@@ -130,87 +138,6 @@ func Convert(repoPath string) error {
 	//go wrong unnoticed there
 
 	Log.Println("All tasks finished")
-	return nil
-}
-
-func LoadConfig(path string, out *map[string]interface{}) error {
-	cfgbytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(cfgbytes, out)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *conversion) checkRepoVersion() error {
-	vstr, err := ioutil.ReadFile(filepath.Join(c.path, "version"))
-	if err != nil {
-		return err
-	}
-
-	version, err := strconv.Atoi(strings.TrimSpace(string(vstr)))
-	if err != nil {
-		return err
-	}
-
-	if version != SuppertedRepoVersion {
-		return fmt.Errorf("unsupported fsrepo version: %d", version)
-	}
-
-	return nil
-}
-
-func (c *conversion) loadSpecs() error {
-	oldSpec := make(map[string]interface{})
-	err := LoadConfig(filepath.Join(c.path, SpecsFile), &oldSpec)
-	if err != nil {
-		return err
-	}
-
-	curSpec, ok := oldSpec["spec"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("no 'spec' or invalid type in %s", filepath.Join(c.path, SpecsFile))
-	}
-	c.dsSpec = curSpec
-
-	repoConfig := make(map[string]interface{})
-	err = LoadConfig(filepath.Join(c.path, ConfigFile), &repoConfig)
-	if err != nil {
-		return err
-	}
-
-	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("no 'Datastore' or invalid type in %s", filepath.Join(c.path, ConfigFile))
-	}
-
-	dsSpec, ok := dsConfig["Spec"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(c.path, ConfigFile))
-	}
-
-	c.newDsSpec = dsSpec
-	return nil
-}
-
-func (c *conversion) validateSpecs() error {
-	oldPaths, err := config.Validate(c.dsSpec)
-	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, SpecsFile))
-	}
-	c.oldPaths = oldPaths
-
-	newPaths, err := config.Validate(c.newDsSpec)
-	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, ConfigFile))
-	}
-	c.newPaths = newPaths
-
 	return nil
 }
 
@@ -452,14 +379,4 @@ func (c *conversion) saveNewSpec() (err error) {
 	}
 
 	return nil
-}
-
-func (c *conversion) addStep(format string, args ...interface{}) {
-	c.steps = append(c.steps, fmt.Sprintf(format, args...))
-}
-
-func (c *conversion) wrapErr(err error) error {
-	s := strings.Join(c.steps, "\n")
-
-	return errors.Wrapf(err, "CONVERSION ERROR\n----------\nConversion steps done so far:\n%s\n----------\n", s)
 }
