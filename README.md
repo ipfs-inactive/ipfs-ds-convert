@@ -15,7 +15,7 @@ TODO:
 - [x] Finish basic conversion code
 - [x] package.json for gx
 - [ ] Tests
-  - [ ] CI (needs https://github.com/ipfs/go-ipfs/pull/4007, https://github.com/ipfs/go-ipfs/pull/3575)
+  - [x] CI (needs https://github.com/ipfs/go-ipfs/pull/4007, https://github.com/ipfs/go-ipfs/pull/3575)
   - [ ] Coverage > 80% or more
 - [ ] Review
 - [ ] Standard readme

@@ -1,0 +1,29 @@
+{
+  "mounts": [
+    {
+      "compression": "none",
+      "path": "dsa",
+      "type": "badgerds",
+      "mountpoint": "/a"
+    },
+    {
+      "compression": "none",
+      "path": "dsb",
+      "type": "levelds",
+      "mountpoint": "/b"
+    },
+    {
+      "compression": "none",
+      "path": "ds",
+      "type": "badgerds",
+      "mountpoint": "/"
+    },
+    {
+      "compression": "none",
+      "path": "dsc",
+      "type": "badgerds",
+      "mountpoint": "/d"
+    }
+  ],
+  "type": "mount"
+}

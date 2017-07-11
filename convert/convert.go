@@ -94,7 +94,7 @@ func Convert(repoPath string) error {
 
 	Log.Println("Copying keys, this can take a long time")
 
-	err = c.copyKeys()
+	err = c.copyAllKeys()
 	if err != nil {
 		return c.wrapErr(err)
 	}
@@ -178,11 +178,15 @@ func (c *conversion) closeDatastores() error {
 	return nil
 }
 
-func (c *conversion) copyKeys() error {
+func (c *conversion) copyAllKeys() error {
 	c.addStep("start copying data")
+	return copyKeys(c.oldDs, c.newDs)
+}
+
+func copyKeys(fromDs Datastore, toDs Datastore) error {
 	//flatfs only supports KeysOnly:true
 	//TODO: try to optimize this
-	res, err := c.oldDs.Query(dsq.Query{Prefix: "/", KeysOnly: true})
+	res, err := fromDs.Query(dsq.Query{Prefix: "/", KeysOnly: true})
 	if err != nil {
 		return errors.Wrapf(err, "error opening query")
 	}
@@ -206,7 +210,7 @@ func (c *conversion) copyKeys() error {
 		}
 
 		if curBatch == nil {
-			curBatch, err = c.newDs.Batch()
+			curBatch, err = toDs.Batch()
 			if entry.Error != nil {
 				return errors.Wrapf(err, "error creating batch")
 			}
@@ -215,7 +219,7 @@ func (c *conversion) copyKeys() error {
 			}
 		}
 
-		val, err := c.oldDs.Get(ds.RawKey(entry.Key))
+		val, err := fromDs.Get(ds.RawKey(entry.Key))
 		if err != nil {
 			return errors.New("get from old datastore failed")
 		}

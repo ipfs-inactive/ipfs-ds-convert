@@ -12,7 +12,7 @@ import (
 	fsrepo "gx/ipfs/QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V/go-ipfs/repo/fsrepo"
 )
 
-func NewTestRepo(t *testing.T) (string, func(t *testing.T)) {
+func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {
 	conf, err := config.Init(os.Stdout, 1024)
 	if err != nil {
 		t.Fatal(err)
@@ -21,6 +21,10 @@ func NewTestRepo(t *testing.T) (string, func(t *testing.T)) {
 	err = config.ConfigProfiles["test"](conf)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if spec != nil {
+		conf.Datastore.Spec = spec
 	}
 
 	repoRoot, err := ioutil.TempDir("/tmp", "ds-convert-test-")

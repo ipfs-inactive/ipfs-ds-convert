@@ -9,7 +9,7 @@ import (
 )
 
 func prepareTest(t *testing.T, keys, blocks int) (string, func(t *testing.T), int64, int64) {
-	dir, _close := testutil.NewTestRepo(t)
+	dir, _close := testutil.NewTestRepo(t, nil)
 
 	r, err := testutil.OpenRepo(dir)
 	if err != nil {
@@ -71,4 +71,60 @@ func TestBasicConvert(t *testing.T) {
 	}
 
 	finishTest(t, dir, s1, s2, 3000, 10000)
+}
+
+func TestSkipCopyConvert(t *testing.T) {
+	spec := make(map[string]interface{})
+	err := convert.LoadConfig("../testfiles/skipableSpec", &spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dir, _close := testutil.NewTestRepo(t, spec)
+	defer _close(t)
+
+	r, err := testutil.OpenRepo(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	prefixes := []string{"a/", "b/", "c/", "d/", "e/"}
+	seeds := []int64{}
+
+	for _, prefix := range prefixes {
+		seed, err := testutil.InsertRandomKeys(prefix, 1000, r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		seeds = append(seeds, seed)
+	}
+
+	err = r.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/skipableDstSpec")
+
+	err = convert.Convert(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r, err = testutil.OpenRepo(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i, prefix := range prefixes {
+		err = testutil.Verify(prefix, 1000, seeds[i], r)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	err = r.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
