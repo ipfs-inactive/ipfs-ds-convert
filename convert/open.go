@@ -102,7 +102,6 @@ func init() {
 		"flatfs":   FlatfsDatastoreConfig,
 		"levelds":  LeveldsDatastoreConfig,
 		"badgerds": BadgerdsDatastoreConfig,
-		"mem":      MemDatastoreConfig,
 		"log":      LogDatastoreConfig,
 		"measure":  MeasureDatastoreConfig,
 	}
@@ -267,22 +266,6 @@ func (c *leveldsDatastoreConfig) Create(path string) (Datastore, error) {
 	return levelds.NewDatastore(p, &levelds.Options{
 		Compression: c.compression,
 	})
-}
-
-type memDatastoreConfig struct {
-	cfg map[string]interface{}
-}
-
-func MemDatastoreConfig(params map[string]interface{}) (DatastoreConfig, error) {
-	return &memDatastoreConfig{params}, nil
-}
-
-func (c *memDatastoreConfig) DiskId() string {
-	return ""
-}
-
-func (c *memDatastoreConfig) Create(string) (Datastore, error) {
-	return ds.NewMapDatastore(), nil
 }
 
 type logDatastoreConfig struct {
