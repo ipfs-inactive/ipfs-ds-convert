@@ -180,10 +180,10 @@ func (c *conversion) closeDatastores() error {
 
 func (c *conversion) copyAllKeys() error {
 	c.addStep("start copying data")
-	return copyKeys(c.oldDs, c.newDs)
+	return CopyKeys(c.oldDs, c.newDs)
 }
 
-func copyKeys(fromDs Datastore, toDs Datastore) error {
+func CopyKeys(fromDs Datastore, toDs Datastore) error {
 	//flatfs only supports KeysOnly:true
 	//TODO: try to optimize this
 	res, err := fromDs.Query(dsq.Query{Prefix: "/", KeysOnly: true})
