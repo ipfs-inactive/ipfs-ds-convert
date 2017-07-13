@@ -195,11 +195,13 @@ func CopyKeys(fromDs Datastore, toDs Datastore) error {
 	maxBatchEntries := 1024
 	maxBatchSize := 16 << 20
 
+	doneEntries := 0
 	curEntries := 0
 	curSize := 0
 
 	var curBatch ds.Batch
 
+	fmt.Printf("\n")
 	for {
 		entry, ok := res.NextSync()
 		if entry.Error != nil {
@@ -238,11 +240,15 @@ func CopyKeys(fromDs Datastore, toDs Datastore) error {
 				return errors.Wrapf(err, "batch commit failed")
 			}
 
+			doneEntries += curEntries
+			fmt.Printf("\rcopied %d keys", doneEntries)
+
 			curEntries = 0
 			curSize = 0
 		}
-
 	}
+
+	fmt.Printf("\n")
 
 	if curEntries > 0 {
 		if curBatch == nil {

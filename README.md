@@ -7,7 +7,7 @@ ipfs-ds-convert
 [![Coverage Status](https://coveralls.io/repos/github/ipfs/ipfs-ds-convert/badge.svg)](https://coveralls.io/github/ipfs/ipfs-ds-convert)
 [![Travis CI](https://circleci.com/gh/ipfs/ipfs-ds-convert/tree/master.svg?style=shield)](https://circleci.com/gh/ipfs/ipfs-ds-convert/tree/master)
 
-> Datastore setup converter for go-ipfs
+> Datastore converter for go-ipfs
 
 This tool is WIP and may damage your data. Make sure to backup first.
 

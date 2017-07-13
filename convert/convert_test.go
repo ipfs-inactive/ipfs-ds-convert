@@ -1,6 +1,7 @@
 package convert_test
 
 import (
+	"fmt"
 	"path"
 	"testing"
 
@@ -41,11 +42,13 @@ func finishTest(t *testing.T, dir string, seed1, seed2 int64, keys, blocks int) 
 		t.Fatal(err)
 	}
 
+	fmt.Println("Generating keys")
 	err = testutil.Verify("", keys, seed1, r)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	fmt.Println("Generating blocks")
 	err = testutil.Verify("blocks/", blocks, seed2, r)
 	if err != nil {
 		t.Fatal(err)
@@ -92,6 +95,7 @@ func TestSkipCopyConvert(t *testing.T) {
 	seeds := []int64{}
 
 	for _, prefix := range prefixes {
+		fmt.Println("Generating " + prefix)
 		seed, err := testutil.InsertRandomKeys(prefix, 1000, r)
 		if err != nil {
 			t.Fatal(err)

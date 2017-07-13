@@ -7,6 +7,6 @@ import (
 )
 
 func TestNewTestRepo(t *testing.T) {
-	_, cl := testutil.NewTestRepo(t)
+	_, cl := testutil.NewTestRepo(t, nil)
 	cl(t)
 }
