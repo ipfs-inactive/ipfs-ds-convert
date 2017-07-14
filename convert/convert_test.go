@@ -62,7 +62,7 @@ func finishTest(t *testing.T, dir string, seed1, seed2 int64, keys, blocks int) 
 
 func TestBasicConvert(t *testing.T) {
 	//Prepare repo
-	dir, _close, s1, s2 := prepareTest(t, 3000, 10000)
+	dir, _close, s1, s2 := prepareTest(t, 3000, 3000)
 	defer _close(t)
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/badgerSpec")
@@ -73,7 +73,7 @@ func TestBasicConvert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	finishTest(t, dir, s1, s2, 3000, 10000)
+	finishTest(t, dir, s1, s2, 3000, 3000)
 }
 
 func TestSkipCopyConvert(t *testing.T) {

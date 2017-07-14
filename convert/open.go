@@ -2,6 +2,7 @@ package convert
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -70,12 +71,12 @@ func OpenDatastore(path string, params map[string]interface{}) (Datastore, error
 	}, nil
 }
 
-func DatastoreId(params map[string]interface{}) string {
+func DatastoreSpec(params map[string]interface{}) string {
 	dsc, err := AnyDatastoreConfig(params)
 	if err != nil {
 		return ""
 	}
-	return dsc.DiskId()
+	return dsc.DiskSpec().String()
 }
 
 // From https://github.com/ipfs/go-ipfs/blob/8525be5990d3a0b5ece0d6773764756f9cbf15e9/repo/fsrepo/datastores.go
@@ -83,15 +84,29 @@ func DatastoreId(params map[string]interface{}) string {
 // ConfigFromMap creates a new datastore config from a map
 type ConfigFromMap func(map[string]interface{}) (DatastoreConfig, error)
 
+type DiskSpec map[string]interface{}
+
 type DatastoreConfig interface {
-	// DiskId is a unique id representing the Datastore config as
-	// stored on disk, runtime config values are not part of this Id.
-	// Returns an empty string if the datastore does not have an on
-	// disk representation. No length limit.
-	DiskId() string
+	// DiskSpec returns a minimal configuration of the datastore
+	// represting what is stored on disk.  Run time values are
+	// excluded.
+	DiskSpec() DiskSpec
 
 	// Create instantiate a new datastore from this config
 	Create(path string) (Datastore, error)
+}
+
+func (spec DiskSpec) Bytes() []byte {
+	b, err := json.Marshal(spec)
+	if err != nil {
+		// should not happen
+		panic(err)
+	}
+	return bytes.TrimSpace(b)
+}
+
+func (spec DiskSpec) String() string {
+	return string(spec.Bytes())
 }
 
 var datastores map[string]ConfigFromMap
@@ -159,12 +174,19 @@ func MountDatastoreConfig(params map[string]interface{}) (DatastoreConfig, error
 	return &res, nil
 }
 
-func (c *mountDatastoreConfig) DiskId() string {
-	buf := new(bytes.Buffer)
-	for _, m := range c.mounts {
-		fmt.Fprintf(buf, "%s:{%s};", m.prefix.String(), m.ds.DiskId())
+func (c *mountDatastoreConfig) DiskSpec() DiskSpec {
+	cfg := map[string]interface{}{"type": "mount"}
+	mounts := make([]interface{}, len(c.mounts))
+	for i, m := range c.mounts {
+		c := m.ds.DiskSpec()
+		if c == nil {
+			c = make(map[string]interface{})
+		}
+		c["mountpoint"] = m.prefix.String()
+		mounts[i] = c
 	}
-	return buf.String()
+	cfg["mounts"] = mounts
+	return cfg
 }
 
 func (c *mountDatastoreConfig) Create(path string) (Datastore, error) {
@@ -207,13 +229,18 @@ func FlatfsDatastoreConfig(params map[string]interface{}) (DatastoreConfig, erro
 
 	c.syncField, ok = params["sync"].(bool)
 	if !ok {
-		return nil, fmt.Errorf("'sync' field is missing or not boolean")
+		//TODO: temp hack to get around missing runtime fields in datastore_spec
+		c.syncField = true
 	}
 	return &c, nil
 }
 
-func (c *flatfsDatastoreConfig) DiskId() string {
-	return fmt.Sprintf("flatfs;%s;%s", c.path, c.shardFun.String())
+func (c *flatfsDatastoreConfig) DiskSpec() DiskSpec {
+	return map[string]interface{}{
+		"type":      "flatfs",
+		"path":      c.path,
+		"shardFunc": c.shardFun.String(),
+	}
 }
 
 func (c *flatfsDatastoreConfig) Create(path string) (Datastore, error) {
@@ -253,8 +280,11 @@ func LeveldsDatastoreConfig(params map[string]interface{}) (DatastoreConfig, err
 	return &c, nil
 }
 
-func (c *leveldsDatastoreConfig) DiskId() string {
-	return fmt.Sprintf("levelds;%s", c.path)
+func (c *leveldsDatastoreConfig) DiskSpec() DiskSpec {
+	return map[string]interface{}{
+		"type": "levelds",
+		"path": c.path,
+	}
 }
 
 func (c *leveldsDatastoreConfig) Create(path string) (Datastore, error) {
@@ -298,8 +328,8 @@ func (c *logDatastoreConfig) Create(path string) (Datastore, error) {
 	return ds.NewLogDatastore(child, c.name), nil
 }
 
-func (c *logDatastoreConfig) DiskId() string {
-	return c.child.DiskId()
+func (c *logDatastoreConfig) DiskSpec() DiskSpec {
+	return c.child.DiskSpec()
 }
 
 type measureDatastoreConfig struct {
@@ -323,8 +353,8 @@ func MeasureDatastoreConfig(params map[string]interface{}) (DatastoreConfig, err
 	return &measureDatastoreConfig{child, prefix}, nil
 }
 
-func (c *measureDatastoreConfig) DiskId() string {
-	return c.child.DiskId()
+func (c *measureDatastoreConfig) DiskSpec() DiskSpec {
+	return c.child.DiskSpec()
 }
 
 func (c measureDatastoreConfig) Create(path string) (Datastore, error) {
@@ -351,8 +381,11 @@ func BadgerdsDatastoreConfig(params map[string]interface{}) (DatastoreConfig, er
 	return &c, nil
 }
 
-func (c *badgerdsDatastoreConfig) DiskId() string {
-	return fmt.Sprintf("badgerds;%s", c.path)
+func (c *badgerdsDatastoreConfig) DiskSpec() DiskSpec {
+	return map[string]interface{}{
+		"type": "badgerds",
+		"path": c.path,
+	}
 }
 
 func (c *badgerdsDatastoreConfig) Create(path string) (Datastore, error) {

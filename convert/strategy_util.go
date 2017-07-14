@@ -21,7 +21,7 @@ func (s *Spec) str(key string) (string, bool) {
 }
 
 func (s *Spec) Id() string {
-	return DatastoreId(*s)
+	return DatastoreSpec(*s)
 }
 
 type SimpleMount struct {

@@ -1,7 +1,6 @@
 package convert
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -20,7 +19,7 @@ import (
 const (
 	LockFile   = "repo.lock"
 	ConfigFile = "config"
-	SpecsFile  = "spec"
+	SpecsFile  = "datastore_spec"
 
 	SuppertedRepoVersion = 6
 	ToolVersion          = "0.0.1"
@@ -371,19 +370,10 @@ func (c *conversion) verifyKeys() (n int, err error) {
 }
 
 func (c *conversion) saveNewSpec() (err error) {
-	specs := map[string]interface{}{
-		"id":   DatastoreId(c.newDsSpec),
-		"spec": c.newDsSpec,
-	}
 
 	specsPath := filepath.Join(c.path, SpecsFile)
 
-	b, err := json.Marshal(specs)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(specsPath, b, 0660)
+	err = ioutil.WriteFile(specsPath, []byte(DatastoreSpec(c.newDsSpec)), 0660)
 	if err != nil {
 		return err
 	}

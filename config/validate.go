@@ -92,9 +92,11 @@ func leveldsValidator(ctx *validatorContext, dsConfiguration map[string]interfac
 		return err
 	}
 
+	//TODO: remove this horrible hack, and inject defaults properly into datastore_spec
 	_, ok := dsConfiguration["compression"].(string)
 	if !ok {
-		return errors.New("invalid 'compression' type in levelds datastore")
+		//return errors.New("invalid 'compression' type in levelds datastore")
+		dsConfiguration["compression"] = "none"
 	}
 
 	return nil

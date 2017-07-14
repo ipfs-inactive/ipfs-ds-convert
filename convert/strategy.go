@@ -118,7 +118,7 @@ func simpleMountInfo(mountSpec Spec) (SimpleMounts, error) {
 			return nil, fmt.Errorf("mount field 'mountpoint' is not defined or of invalid type")
 		}
 
-		simpleMounts = append(simpleMounts, SimpleMount{prefix: ds.NewKey(prefix), diskId: DatastoreId(mount), spec: mount})
+		simpleMounts = append(simpleMounts, SimpleMount{prefix: ds.NewKey(prefix), diskId: DatastoreSpec(mount), spec: mount})
 	}
 
 	return simpleMounts, nil

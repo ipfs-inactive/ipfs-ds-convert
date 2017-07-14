@@ -35,12 +35,7 @@ func (c *conversion) loadSpecs() error {
 	if err != nil {
 		return err
 	}
-
-	curSpec, ok := oldSpec["spec"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("no 'spec' or invalid type in %s", filepath.Join(c.path, SpecsFile))
-	}
-	c.dsSpec = curSpec
+	c.dsSpec = oldSpec
 
 	repoConfig := make(map[string]interface{})
 	err = LoadConfig(filepath.Join(c.path, ConfigFile), &repoConfig)

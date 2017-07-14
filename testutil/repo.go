@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	convert "github.com/ipfs/ipfs-ds-convert/convert"
-	config "gx/ipfs/QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V/go-ipfs/repo/config"
-	fsrepo "gx/ipfs/QmTfEA66H8JVypARWoQuQv3bw38DXjxtMZpcEKctpjnz3V/go-ipfs/repo/fsrepo"
+	config "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo/config"
+	fsrepo "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo/fsrepo"
 )
 
 func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {
