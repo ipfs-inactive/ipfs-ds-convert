@@ -30,5 +30,5 @@ func (s *copyStrategy) Run() error {
 }
 
 func (s *copyStrategy) Id() string {
-	return fmt.Sprintf("copy:{%s};{%s}", s.fromSpec.Id(), s.toSpec.Id())
+	return fmt.Sprintf(`{"type":"copy","from":%s,"to":%s}`, s.fromSpec.Id(), s.toSpec.Id())
 }

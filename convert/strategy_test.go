@@ -104,15 +104,15 @@ var (
 func TestNewStrategy(t *testing.T) {
 	strat, err := convert.NewStrategy(basicSpec, matchingSpec)
 	assert(t, err == nil, err)
-	assert(t, strat.Id() == `copy:{{"mounts":[],"type":"mount"}};{{"mounts":[],"type":"mount"}}`, strat.Id())
+	assert(t, strat.Id() == `{"type":"copy","from":{"mounts":[],"type":"mount"},"to":{"mounts":[],"type":"mount"}}`, strat.Id())
 
 	strat, err = convert.NewStrategy(basicSpec, cleanSpec)
 	assert(t, err == nil, err)
-	assert(t, strat.Id() == `copy:{{"mounts":[],"type":"mount"}};{{"mounts":[],"type":"mount"}}`, strat.Id())
+	assert(t, strat.Id() == `{"type":"copy","from":{"mounts":[],"type":"mount"},"to":{"mounts":[],"type":"mount"}}`, strat.Id())
 
 	strat, err = convert.NewStrategy(basicSpec, changeBlocksSpec)
 	assert(t, err == nil, err)
-	assert(t, strat.Id() == `copy:{{"mounts":[{"mountpoint":{"string":"/blocks"},"path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","type":"flatfs"}],"type":"mount"}};{{"mounts":[{"mountpoint":{"string":"/blocks"},"path":"blocks","type":"badgerds"}],"type":"mount"}}`, strat.Id())
+	assert(t, strat.Id() == `{"type":"copy","from":{"mounts":[{"mountpoint":"/blocks","path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","type":"flatfs"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/blocks","path":"blocks","type":"badgerds"}],"type":"mount"}}`, strat.Id())
 }
 
 func assert(t *testing.T, cond bool, err interface{}) {
