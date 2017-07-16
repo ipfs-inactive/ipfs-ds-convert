@@ -142,18 +142,18 @@ func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) 
 	if _, ok := dsTypes[fromType]; ok {
 		if toType == fromType {
 			//TODO: check if dirs match, can just skip conversion, else just move directories
-			return NewCopyStrategy(fromSpec, toSpec), nil
+			return NewCopyStrategy(fromSpec, toSpec)
 		}
 
 		//TODO: might still be able to optimize if toType is single element mount
-		return NewCopyStrategy(fromSpec, toSpec), nil
+		return NewCopyStrategy(fromSpec, toSpec)
 	}
 
 	if fromType == "mount" {
 		if toType != "mount" {
 			//TODO: this can be possible to optimize in case there is only one element
 			//in mount, but it's probably not worth it
-			return NewCopyStrategy(fromSpec, toSpec), nil
+			return NewCopyStrategy(fromSpec, toSpec)
 		}
 
 		//TODO create more test cases
@@ -161,32 +161,134 @@ func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) 
 		//TODO: see if duplicate mount prefix is filtered out
 		var skipable []SimpleMount
 
-		fMounts, err := simpleMountInfo(fromSpec)
+		fromMounts, err := simpleMountInfo(fromSpec)
 		if err != nil {
 			return nil, errors.Wrapf(err, "parsing old spec")
 		}
 
-		tMounts, err := simpleMountInfo(toSpec)
+		toMounts, err := simpleMountInfo(toSpec)
 		if err != nil {
 			return nil, errors.Wrapf(err, "parsing new spec")
 		}
 
-		for _, from := range fMounts {
-			if tMounts.hasMatching(from) {
+		for _, from := range fromMounts {
+			if toMounts.hasMatching(from) {
 				skipable = append(skipable, from)
 			}
 		}
 
 		//TODO: handle renames, somehow
 
-		fMounts = fMounts.filter(skipable)
-		tMounts = tMounts.filter(skipable)
+		fromMountsOpt := fromMounts.filter(skipable)
+		toMountsOpt := toMounts.filter(skipable)
 
-		//TODO filter out nested keys, BOTH WAYS
+		fromMountsOpt.sort()
+		toMountsOpt.sort()
 
-		return NewCopyStrategy(fMounts.spec(), tMounts.spec()), nil
+		for _, toMount := range toMountsOpt {
+			if fromMounts.hasPrefixed(toMount) == -1 {
+				var bestMatch SimpleMount
+				bestMatched := -1
+				toParts := toMount.prefix.List()
+
+				for _, fromMount := range fromMounts {
+					matched := matchStringsPrefix(toParts, fromMount.prefix.List())
+					if matched > bestMatched {
+						bestMatched = matched
+						bestMatch = fromMount
+					}
+				}
+
+				if bestMatched == -1 {
+					return nil, fmt.Errorf("couldn't find best match for toMount %s", toMount.prefix.String())
+				}
+
+				if fromMountsOpt.hasPrefixed(bestMatch) == -1 {
+					fromMountsOpt = append(fromMountsOpt, bestMatch)
+				}
+				if toMountsOpt.hasPrefixed(bestMatch) == -1 {
+					ti := toMounts.hasPrefixed(bestMatch)
+					if ti == -1 {
+						//TODO: fallback to copyAll
+						return nil, fmt.Errorf("couldn't find %s in toMounts, parent of %s", bestMatch.prefix.String(), toMount)
+					}
+					toMountsOpt = append(toMountsOpt, toMounts[ti])
+				}
+			}
+		}
+
+		//TODO: Deduplicate
+		for _, fromMount := range fromMountsOpt {
+			if toMounts.hasPrefixed(fromMount) == -1 {
+				var bestMatch SimpleMount
+				bestMatched := -1
+				fromParts := fromMount.prefix.List()
+
+				for _, toMount := range toMounts {
+					matched := matchStringsPrefix(fromParts, toMount.prefix.List())
+					if matched > bestMatched {
+						bestMatched = matched
+						bestMatch = toMount
+					}
+				}
+
+				if bestMatched == -1 {
+					return nil, fmt.Errorf("couldn't find best match for fromMount %s", fromMount.prefix.String())
+				}
+
+				if toMountsOpt.hasPrefixed(bestMatch) == -1 {
+					toMountsOpt = append(toMountsOpt, bestMatch)
+				}
+				if fromMountsOpt.hasPrefixed(bestMatch) == -1 {
+					ti := fromMounts.hasPrefixed(bestMatch)
+					if ti == -1 {
+						//TODO: fallback to copyAll
+						return nil, fmt.Errorf("couldn't find %s in fromMounts, parent of %s", bestMatch.prefix.String(), fromMount)
+					}
+					fromMountsOpt = append(fromMountsOpt, fromMounts[ti])
+				}
+			}
+		}
+
+		if len(fromMountsOpt) == 0 {
+			if len(toMountsOpt) != 0 {
+				return nil, fmt.Errorf("strategy error: len(toMounts) != 0, please report")
+			}
+
+			return NewNoopStrategy()
+		}
+		if len(toMountsOpt) == 0 {
+			return nil, fmt.Errorf("strategy error: len(toMounts) == 0, please report")
+		}
+
+		return NewCopyStrategy(fromMountsOpt.spec(), toMountsOpt.spec())
 	}
 
 	//should not normally happen
 	return nil, errors.New("unable to create conversion strategy")
+}
+
+func matchStringsPrefix(pattern, to []string) int {
+	if len(pattern) == 1 && pattern[0] == "" {
+		pattern = []string{}
+	}
+
+	if len(to) == 1 && to[0] == "" {
+		to = []string{}
+	}
+
+	if len(to) > len(pattern) {
+		return -1
+	}
+
+	for i, part := range to {
+		if part != pattern[i] {
+			if i == 0 {
+				return -1
+			}
+			return i
+		}
+	}
+
+	return len(to)
 }

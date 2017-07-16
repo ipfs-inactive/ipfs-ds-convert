@@ -3,6 +3,7 @@ package convert
 import (
 
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
+	"sort"
 )
 
 type Spec map[string]interface{}
@@ -33,11 +34,21 @@ type SimpleMount struct {
 
 type SimpleMounts []SimpleMount
 
-func (m *SimpleMounts) hasMatching(searched SimpleMount) bool {
-	for _, mnt := range *m {
+func (m *SimpleMounts) hasPrefixed(searched SimpleMount) int {
+	for i, mnt := range *m {
 		if mnt.prefix.Equal(searched.prefix) {
-			return mnt.diskId == searched.diskId
+			return i
 		}
+	}
+
+	return -1
+}
+
+func (m *SimpleMounts) hasMatching(searched SimpleMount) bool {
+	i := m.hasPrefixed(searched)
+
+	if i != -1 {
+		return (*m)[i].diskId == searched.diskId
 	}
 
 	return false
@@ -53,6 +64,10 @@ func (m *SimpleMounts) filter(filter SimpleMounts) SimpleMounts {
 	}
 
 	return out
+}
+
+func (m *SimpleMounts) sort() {
+	sort.Slice(*m, func(i, j int) bool { return (*m)[i].prefix.String() > (*m)[j].prefix.String() })
 }
 
 func (m *SimpleMounts) spec() Spec {
