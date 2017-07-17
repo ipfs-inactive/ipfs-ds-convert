@@ -1,14 +1,14 @@
 package convert
 
 import (
-	"fmt"
+	"encoding/json"
 
 	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 	"github.com/ipfs/ipfs-ds-convert/config"
 )
 
 type Strategy interface {
-	Run() error
+	Spec() Spec
 	Id() string
 }
 
@@ -57,14 +57,17 @@ func NewCopyStrategy(fromSpec Spec, toSpec Spec) (Strategy, error) {
 	}, nil
 }
 
-func (s *copyStrategy) Run() error {
-	return errors.New("TODO")
-	//open, tospec as temp
-	//return CopyKeys(s.fromDs, s.toDs)
+func (s *copyStrategy) Spec() Spec {
+	return Spec{
+		"type": "copy",
+		"from": s.fromSpec,
+		"to": s.toSpec,
+	}
 }
 
 func (s *copyStrategy) Id() string {
-	return fmt.Sprintf(`{"type":"copy","from":%s,"to":%s}`, s.fromSpec.Id(), s.toSpec.Id())
+	b, _ := json.Marshal(s.Spec())
+	return string(b)
 }
 
 type noopStrategy struct {
@@ -74,10 +77,13 @@ func NewNoopStrategy() (Strategy, error) {
 	return &noopStrategy{}, nil
 }
 
-func (s *noopStrategy) Run() error {
-	return nil
+func (s *noopStrategy) Spec() Spec {
+	return Spec{
+		"type": "noop",
+	}
 }
 
 func (s *noopStrategy) Id() string {
-	return fmt.Sprintf(`{"type":"noop"}`)
+	b, _ := json.Marshal(s.Spec())
+	return string(b)
 }

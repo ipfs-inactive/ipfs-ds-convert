@@ -119,7 +119,7 @@ var (
 					},
 				},
 			},
-			strategy: `{"type":"copy","from":{"mounts":[{"mountpoint":"/blocks","path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","type":"flatfs"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/blocks","path":"blocks","type":"badgerds"}],"type":"mount"}}`,
+			strategy: `{"from":{"mounts":[{"mountpoint":"/blocks","path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","sync":true,"type":"flatfs"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/blocks","path":"blocks","type":"badgerds"}],"type":"mount"},"type":"copy"}`,
 		},
 		{
 			//adds /foo mount, needs to copy [/,/foo]
@@ -147,7 +147,7 @@ var (
 					},
 				},
 			},
-			strategy: `{"type":"copy","from":{"mounts":[{"mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/foo","path":"foo","type":"badgerds"},{"mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"}}`,
+			strategy: `{"from":{"mounts":[{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/foo","path":"foo","type":"badgerds"},{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"type":"copy"}`,
 		},
 		{
 			//has single / mount, needs to copy [/,/blocks]
@@ -163,7 +163,7 @@ var (
 					},
 				},
 			},
-			strategy: `{"type":"copy","from":{"mounts":[{"mountpoint":"/blocks","path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","type":"flatfs"},{"mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"}}`,
+			strategy: `{"from":{"mounts":[{"mountpoint":"/blocks","path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","sync":true,"type":"flatfs"},{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"to":{"mounts":[{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"type":"copy"}`,
 		},
 		{
 			//skippable spec from testfiles
@@ -218,7 +218,7 @@ var (
 					},
 				},
 			},
-			strategy: `{"type":"copy","from":{"mounts":[{"mountpoint":"/c","path":"dsc","type":"badgerds"},{"mountpoint":"/b","path":"dsb","type":"badgerds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/d","path":"dsc","type":"badgerds"},{"mountpoint":"/b","path":"dsb","type":"levelds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"}}`,
+			strategy: `{"from":{"mounts":[{"mountpoint":"/c","path":"dsc","type":"badgerds"},{"mountpoint":"/b","path":"dsb","type":"badgerds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/d","path":"dsc","type":"badgerds"},{"compression":"none","mountpoint":"/b","path":"dsb","type":"levelds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"},"type":"copy"}`,
 		},
 		////////////////////
 		//EDGE CASES
