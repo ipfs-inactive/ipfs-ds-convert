@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
-	"os"
 
 	"github.com/ipfs/ipfs-ds-convert/config"
-	"github.com/ipfs/ipfs-ds-convert/strategy"
 	"github.com/ipfs/ipfs-ds-convert/repo"
+	"github.com/ipfs/ipfs-ds-convert/strategy"
 
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"

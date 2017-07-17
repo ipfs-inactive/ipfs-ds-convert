@@ -4,7 +4,6 @@
     "path": "datastore",
     "type": "notAValidDatastoreType"
   },
-  "mountpoint": "/",
   "prefix": "leveldb.datastore",
   "type": "measure"
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
+	"os"
 )
 
 func TestInvalidRepoVersion(t *testing.T) {
@@ -107,6 +108,27 @@ func TestReusePathSpec(t *testing.T) {
 	}
 
 	if !strings.Contains(err.Error(), "path 'datastore' is already in use") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestROSpec(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := prepareTest(t, 10, 10)
+	defer _close(t)
+
+	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/badgerSpec")
+	if err := os.Chmod(path.Join(dir, convert.SpecsFile), 0400); err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err := convert.Convert(dir)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected error validating datastore spec"))
+	}
+
+	if !strings.Contains(err.Error(), "datastore_spec is not writable") {
 		t.Fatal(fmt.Errorf("unexpected error: %s", err))
 	}
 }

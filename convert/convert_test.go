@@ -7,6 +7,7 @@ import (
 
 	convert "github.com/ipfs/ipfs-ds-convert/convert"
 	testutil "github.com/ipfs/ipfs-ds-convert/testutil"
+	"strings"
 )
 
 func prepareTest(t *testing.T, keys, blocks int) (string, func(t *testing.T), int64, int64) {
@@ -66,6 +67,42 @@ func TestBasicConvert(t *testing.T) {
 	defer _close(t)
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/badgerSpec")
+
+	//Convert!
+	err := convert.Convert(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	finishTest(t, dir, s1, s2, 3000, 3000)
+}
+
+func TestLossyConvert(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := prepareTest(t, 100, 100)
+	defer _close(t)
+
+	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/lossySpec")
+
+	//Convert!
+	err := convert.Convert(dir)
+	if err != nil {
+		if !strings.Contains(err.Error(), "couldn't find best match for fromMount /") {
+			t.Fatal(err)
+		}
+		return
+	}
+
+	t.Errorf("expected error 'couldn't find best match for fromMount /'")
+}
+
+//should cover noop case in convert.go
+func TestNoopConvert(t *testing.T) {
+	//Prepare repo
+	dir, _close, s1, s2 := prepareTest(t, 3000, 3000)
+	defer _close(t)
+
+	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/equalSpec")
 
 	//Convert!
 	err := convert.Convert(dir)

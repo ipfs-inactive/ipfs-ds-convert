@@ -1,8 +1,8 @@
 package strategy_test
 
 import (
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/ipfs/ipfs-ds-convert/strategy"
 )
@@ -201,9 +201,9 @@ var (
 						"path":       "dsa",
 					},
 					map[string]interface{}{
-						"mountpoint": "/b",
-						"type":       "levelds",
-						"path":       "dsb",
+						"mountpoint":  "/b",
+						"type":        "levelds",
+						"path":        "dsb",
 						"compression": "none",
 					},
 					map[string]interface{}{
@@ -219,6 +219,67 @@ var (
 				},
 			},
 			strategy: `{"from":{"mounts":[{"mountpoint":"/c","path":"dsc","type":"badgerds"},{"mountpoint":"/b","path":"dsb","type":"badgerds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/d","path":"dsc","type":"badgerds"},{"compression":"none","mountpoint":"/b","path":"dsb","type":"levelds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"},"type":"copy"}`,
+		},
+		{
+			//from nested mount
+			baseSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/a",
+						"type":       "badgerds",
+						"path":       "dsa",
+					},
+					map[string]interface{}{
+						"mountpoint": "/b",
+						"type":       "badgerds",
+						"path":       "dsb",
+					},
+					map[string]interface{}{
+						"type": "mount",
+						"mountpoint": "/c",
+						"mounts": []interface{}{
+							map[string]interface{}{
+								"mountpoint": "/a",
+								"type":       "badgerds",
+								"path":       "dsc",
+							},
+							map[string]interface{}{
+								"mountpoint": "/",
+								"type":       "badgerds",
+								"path":       "ds",
+							},
+						},
+					},
+				},
+			},
+			destSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/a",
+						"type":       "badgerds",
+						"path":       "dsa",
+					},
+					map[string]interface{}{
+						"mountpoint":  "/b",
+						"type":        "levelds",
+						"path":        "dsb",
+						"compression": "none",
+					},
+					map[string]interface{}{
+						"mountpoint": "/",
+						"type":       "badgerds",
+						"path":       "ds",
+					},
+					map[string]interface{}{
+						"mountpoint": "/d",
+						"type":       "badgerds",
+						"path":       "dsc",
+					},
+				},
+			},
+			err: "parsing old spec: mount entry is not simple, mount datastores can't be nested",
 		},
 		////////////////////
 		//EDGE CASES

@@ -58,7 +58,7 @@ func validate(ctx *validatorContext, dsConfiguration map[string]interface{}) err
 func checkPath(ctx *validatorContext, p interface{}) error {
 	path, ok := p.(string)
 	if !ok {
-		return errors.New("invalid 'path' type in flatfs datastore")
+		return errors.New("invalid 'path' type in datastore")
 	}
 
 	clean := filepath.Clean(path)
@@ -71,8 +71,6 @@ func checkPath(ctx *validatorContext, p interface{}) error {
 	}
 
 	ctx.usedPaths[path] = true
-
-	//TODO: better path validation
 
 	return nil
 }

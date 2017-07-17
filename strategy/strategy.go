@@ -9,7 +9,7 @@ import (
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 )
 
-var ErrMountNotSimple = errors.New("mount is not simple")
+var ErrMountNotSimple = errors.New("mount entry is not simple, mount datastores can't be nested")
 
 var skipTypes = map[string]string{
 	"measure": "child",

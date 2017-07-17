@@ -3,10 +3,14 @@ package convert
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
 	"github.com/ipfs/ipfs-ds-convert/config"
+
+	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 )
 
 func (c *conversion) checkRepoVersion() error {
@@ -28,8 +32,16 @@ func (c *conversion) checkRepoVersion() error {
 }
 
 func (c *conversion) loadSpecs() error {
+	specStat, err := os.Stat(filepath.Join(c.path, SpecsFile))
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if specStat.Mode()&0200 == 0 {
+		return errors.New("datastore_spec is not writable")
+	}
+
 	oldSpec := make(map[string]interface{})
-	err := LoadConfig(filepath.Join(c.path, SpecsFile), &oldSpec)
+	err = LoadConfig(filepath.Join(c.path, SpecsFile), &oldSpec)
 	if err != nil {
 		return err
 	}

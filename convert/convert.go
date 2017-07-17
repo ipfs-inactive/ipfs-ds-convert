@@ -7,8 +7,8 @@ import (
 
 	logging "log"
 
-	"github.com/ipfs/ipfs-ds-convert/strategy"
 	"github.com/ipfs/ipfs-ds-convert/repo"
+	"github.com/ipfs/ipfs-ds-convert/strategy"
 
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 )
