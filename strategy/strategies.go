@@ -1,10 +1,11 @@
-package convert
+package strategy
 
 import (
 	"encoding/json"
 
-	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 	"github.com/ipfs/ipfs-ds-convert/config"
+
+	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 )
 
 type Strategy interface {
@@ -18,7 +19,7 @@ type copyStrategy struct {
 }
 
 func validateCopySpec(spec Spec) error {
-	t, ok := spec.dsType()
+	t, ok := spec.Type()
 	if !ok {
 		return errors.New("copy spec has no type or field type is invalid")
 	}
@@ -39,7 +40,7 @@ func validateCopySpec(spec Spec) error {
 		}
 	}
 
-	_, err := config.Validate(spec)
+	_, err := config.Validate(spec, false)
 	return err
 }
 
@@ -61,7 +62,7 @@ func (s *copyStrategy) Spec() Spec {
 	return Spec{
 		"type": "copy",
 		"from": s.fromSpec,
-		"to": s.toSpec,
+		"to":   s.toSpec,
 	}
 }
 

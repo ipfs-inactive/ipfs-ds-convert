@@ -1,14 +1,16 @@
-package convert
+package strategy
 
 import (
+	"sort"
+
+	"github.com/ipfs/ipfs-ds-convert/repo"
 
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	"sort"
 )
 
 type Spec map[string]interface{}
 
-func (s *Spec) dsType() (string, bool) {
+func (s *Spec) Type() (string, bool) {
 	return s.str("type")
 }
 
@@ -21,8 +23,17 @@ func (s *Spec) str(key string) (string, bool) {
 	return ts, ok
 }
 
+func (s *Spec) Sub(key string) (Spec, bool) {
+	t, ok := (*s)[key]
+	if !ok {
+		return nil, false
+	}
+	ts, ok := t.(Spec)
+	return ts, ok
+}
+
 func (s *Spec) Id() string {
-	return DatastoreSpec(*s)
+	return repo.DatastoreSpec(*s)
 }
 
 type SimpleMount struct {
@@ -79,7 +90,7 @@ func (m *SimpleMounts) spec() Spec {
 	}
 
 	return map[string]interface{}{
-		"type": "mount",
+		"type":   "mount",
 		"mounts": mounts,
 	}
 }

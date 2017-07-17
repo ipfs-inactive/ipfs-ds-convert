@@ -1,4 +1,4 @@
-package convert
+package repo
 
 import (
 	"bytes"
@@ -88,7 +88,7 @@ type DiskSpec map[string]interface{}
 
 type DatastoreConfig interface {
 	// DiskSpec returns a minimal configuration of the datastore
-	// represting what is stored on disk.  Run time values are
+	// represting what is stored on disk. Run time values are
 	// excluded.
 	DiskSpec() DiskSpec
 

@@ -1,10 +1,12 @@
-package convert
+package strategy
 
 import (
 	"fmt"
-	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+
+	"github.com/ipfs/ipfs-ds-convert/repo"
 
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
+	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 )
 
 var ErrMountNotSimple = errors.New("mount is not simple")
@@ -28,7 +30,7 @@ var simpleTypes = map[string]bool{
 }
 
 func cleanUp(specIn Spec) (Spec, error) {
-	t, ok := specIn.dsType()
+	t, ok := specIn.Type()
 	if !ok {
 		return nil, errors.New("invalid or missing 'type' in datastore spec")
 	}
@@ -40,7 +42,8 @@ func cleanUp(specIn Spec) (Spec, error) {
 			return nil, fmt.Errorf("missing '%s' field in datastore spec", childField)
 		}
 
-		child, ok := ch.(Spec)
+		var child Spec
+		child, ok = ch.(map[string]interface{})
 		if !ok {
 			return nil, fmt.Errorf("invalid '%s' field type in datastore spec", childField)
 		}
@@ -69,7 +72,8 @@ func cleanUp(specIn Spec) (Spec, error) {
 		var outMounts []interface{}
 
 		for _, m := range mounts {
-			mount, ok := m.(Spec)
+			var mount Spec
+			mount, ok = m.(map[string]interface{})
 			if !ok {
 				return nil, fmt.Errorf("'mounts' element is of invalid type")
 			}
@@ -103,7 +107,7 @@ func simpleMountInfo(mountSpec Spec) (SimpleMounts, error) {
 			return nil, fmt.Errorf("'mounts' element is of invalid type")
 		}
 
-		dsType, ok := mount.dsType()
+		dsType, ok := mount.Type()
 		if !ok {
 			return nil, fmt.Errorf("mount type is not defined or of invalid type")
 		}
@@ -118,7 +122,7 @@ func simpleMountInfo(mountSpec Spec) (SimpleMounts, error) {
 			return nil, fmt.Errorf("mount field 'mountpoint' is not defined or of invalid type")
 		}
 
-		simpleMounts = append(simpleMounts, SimpleMount{prefix: ds.NewKey(prefix), diskId: DatastoreSpec(mount), spec: mount})
+		simpleMounts = append(simpleMounts, SimpleMount{prefix: ds.NewKey(prefix), diskId: repo.DatastoreSpec(mount), spec: mount})
 	}
 
 	return simpleMounts, nil
@@ -136,8 +140,8 @@ func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) 
 		return nil, err
 	}
 
-	fromType, _ := fromSpec.dsType()
-	toType, _ := toSpec.dsType()
+	fromType, _ := fromSpec.Type()
+	toType, _ := toSpec.Type()
 
 	if _, ok := dsTypes[fromType]; ok {
 		if toType == fromType {

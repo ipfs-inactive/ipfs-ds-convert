@@ -22,7 +22,7 @@ TODO:
 - [ ] Revert on error
   - As a subcommand
 - [ ] Optimize some standard cases
-  - [ ] Don't copy directories when not needed
+  - [x] Don't copy directories when not needed
   - [ ] Detect renames
 - [ ] Report progress
 

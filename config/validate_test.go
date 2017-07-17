@@ -45,7 +45,7 @@ var (
 )
 
 func TestValidate(t *testing.T) {
-	dirs, err := Validate(TestSpec)
+	dirs, err := Validate(TestSpec, false)
 	if err != nil {
 		t.Errorf("Should not return error: %s", err)
 	}

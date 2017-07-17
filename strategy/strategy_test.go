@@ -1,39 +1,39 @@
-package convert_test
+package strategy_test
 
 import (
 	"testing"
-
-	"github.com/ipfs/ipfs-ds-convert/convert"
 	"strings"
+
+	"github.com/ipfs/ipfs-ds-convert/strategy"
 )
 
 type testCase struct {
-	baseSpec convert.Spec
-	destSpec convert.Spec
+	baseSpec map[string]interface{}
+	destSpec map[string]interface{}
 	strategy string
 	err      string
 }
 
 var (
-	basicSpec = convert.Spec{
+	basicSpec = map[string]interface{}{
 		"type": "mount",
 		"mounts": []interface{}{
-			convert.Spec{
+			map[string]interface{}{
 				"mountpoint": "/blocks",
 				"type":       "measure",
 				"prefix":     "flatfs.datastore",
-				"child": convert.Spec{
+				"child": map[string]interface{}{
 					"type":      "flatfs",
 					"path":      "blocks",
 					"sync":      true,
 					"shardFunc": "/repo/flatfs/shard/v1/next-to-last/2",
 				},
 			},
-			convert.Spec{
+			map[string]interface{}{
 				"mountpoint": "/",
 				"type":       "measure",
 				"prefix":     "leveldb.datastore",
-				"child": convert.Spec{
+				"child": map[string]interface{}{
 					"type":        "levelds",
 					"path":        "levelDatastore",
 					"compression": "none",
@@ -49,25 +49,25 @@ var (
 		{
 			//Only 'transparent' layers are changed, no action should be taken
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/blocks",
 						"type":       "log",
 						"name":       "flatfs",
-						"child": convert.Spec{
+						"child": map[string]interface{}{
 							"type":      "flatfs",
 							"path":      "blocks",
 							"sync":      true,
 							"shardFunc": "/repo/flatfs/shard/v1/next-to-last/2",
 						},
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/",
 						"type":       "measure",
 						"prefix":     "otherprefix.datastore",
-						"child": convert.Spec{
+						"child": map[string]interface{}{
 							"type":        "levelds",
 							"path":        "levelDatastore",
 							"compression": "none",
@@ -80,17 +80,17 @@ var (
 		{
 			//Removed 'transparent' layers, no action should be taken
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/blocks",
 						"type":       "flatfs",
 						"path":       "blocks",
 						"sync":       true,
 						"shardFunc":  "/repo/flatfs/shard/v1/next-to-last/2",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint":  "/",
 						"type":        "levelds",
 						"path":        "levelDatastore",
@@ -103,15 +103,15 @@ var (
 		{
 			//changed /blocks, rest untouched
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/blocks",
 						"type":       "badgerds",
 						"path":       "blocks",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint":  "/",
 						"type":        "levelds",
 						"path":        "levelDatastore",
@@ -124,22 +124,22 @@ var (
 		{
 			//adds /foo mount, needs to copy [/,/foo]
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/blocks",
 						"type":       "flatfs",
 						"path":       "blocks",
 						"sync":       true,
 						"shardFunc":  "/repo/flatfs/shard/v1/next-to-last/2",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/foo",
 						"type":       "badgerds",
 						"path":       "foo",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint":  "/",
 						"type":        "levelds",
 						"path":        "levelDatastore",
@@ -152,10 +152,10 @@ var (
 		{
 			//has single / mount, needs to copy [/,/blocks]
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint":  "/",
 						"type":        "levelds",
 						"path":        "levelDatastore",
@@ -167,51 +167,51 @@ var (
 		},
 		{
 			//skippable spec from testfiles
-			baseSpec: convert.Spec{
+			baseSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/a",
 						"type":       "badgerds",
 						"path":       "dsa",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/b",
 						"type":       "badgerds",
 						"path":       "dsb",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/c",
 						"type":       "badgerds",
 						"path":       "dsc",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/",
 						"type":       "badgerds",
 						"path":       "ds",
 					},
 				},
 			},
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/a",
 						"type":       "badgerds",
 						"path":       "dsa",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/b",
 						"type":       "levelds",
 						"path":       "dsb",
 						"compression": "none",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/",
 						"type":       "badgerds",
 						"path":       "ds",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/d",
 						"type":       "badgerds",
 						"path":       "dsc",
@@ -226,9 +226,9 @@ var (
 		{
 			//no dest type
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint":  "/",
 						"type":        "levelds",
 						"path":        "levelDatastore",
@@ -241,7 +241,7 @@ var (
 		{
 			//childless measure
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type":   "measure",
 				"prefix": "flatfs.datastore",
 			},
@@ -250,7 +250,7 @@ var (
 		{
 			//invalid child in measure
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type":   "measure",
 				"prefix": "flatfs.datastore",
 				"child":  "foo",
@@ -260,7 +260,7 @@ var (
 		{
 			//mountless mount
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 			},
 			err: "'mounts' field is missing or not an array",
@@ -268,7 +268,7 @@ var (
 		{
 			//invalid mount mounts type
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type":   "mount",
 				"mounts": "Foo",
 			},
@@ -277,7 +277,7 @@ var (
 		{
 			//invalid mount
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
 					"Foo",
@@ -288,10 +288,10 @@ var (
 		{
 			//invalid mount element
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"type":   "measure",
 						"prefix": "flatfs.datastore",
 					},
@@ -302,22 +302,22 @@ var (
 		{
 			//invalid datastore
 			baseSpec: basicSpec,
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "not a valid ds type",
 			},
 			err: "unknown or unsupported type 'not a valid ds type' in datasotre spec",
 		},
 		{
 			//missing dest point
-			baseSpec: convert.Spec{
+			baseSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/foo",
 						"type":       "badgerds",
 						"path":       "foo",
 					},
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint":  "/bar",
 						"type":        "levelds",
 						"path":        "bar",
@@ -325,10 +325,10 @@ var (
 					},
 				},
 			},
-			destSpec: convert.Spec{
+			destSpec: map[string]interface{}{
 				"type": "mount",
 				"mounts": []interface{}{
-					convert.Spec{
+					map[string]interface{}{
 						"mountpoint": "/foo",
 						"type":       "badgerds",
 						"path":       "foo",
@@ -342,7 +342,7 @@ var (
 
 func TestNewStrategy(t *testing.T) {
 	for _, c := range testCases {
-		strat, err := convert.NewStrategy(c.baseSpec, c.destSpec)
+		strat, err := strategy.NewStrategy(c.baseSpec, c.destSpec)
 		assert(t, (err == nil && c.err == "") || (c.err != "" && strings.Contains(err.Error(), c.err)), err)
 		if c.err == "" {
 			assert(t, strat.Id() == c.strategy, strat.Id())
@@ -352,7 +352,7 @@ func TestNewStrategy(t *testing.T) {
 
 func TestStrategyReverse(t *testing.T) {
 	for _, c := range testCases {
-		_, err := convert.NewStrategy(c.destSpec, c.baseSpec)
+		_, err := strategy.NewStrategy(c.destSpec, c.baseSpec)
 		assert(t, err == nil || c.err != "", err)
 	}
 }

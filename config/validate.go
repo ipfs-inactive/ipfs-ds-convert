@@ -11,7 +11,8 @@ var (
 )
 
 type validatorContext struct {
-	usedPaths map[string]bool
+	usedPaths   map[string]bool
+	fillDefault bool
 }
 
 var validators = map[string]func(*validatorContext, map[string]interface{}) error{}
@@ -25,9 +26,10 @@ func init() {
 	validators["mount"] = mountValidator
 }
 
-func Validate(dsConfiguration map[string]interface{}) (dirs []string, err error) {
+func Validate(dsConfiguration map[string]interface{}, fillDefault bool) (dirs []string, err error) {
 	ctx := validatorContext{
-		usedPaths: map[string]bool{},
+		usedPaths:   map[string]bool{},
+		fillDefault: fillDefault,
 	}
 	err = validate(&ctx, dsConfiguration)
 
@@ -92,11 +94,17 @@ func leveldsValidator(ctx *validatorContext, dsConfiguration map[string]interfac
 		return err
 	}
 
-	//TODO: remove this horrible hack, and inject defaults properly into datastore_spec
-	_, ok := dsConfiguration["compression"].(string)
-	if !ok {
-		//return errors.New("invalid 'compression' type in levelds datastore")
+	_, ok := dsConfiguration["compression"]
+	if !ok && ctx.fillDefault {
 		dsConfiguration["compression"] = "none"
+	} else {
+		if !ok {
+			return errors.New("no compression field in leveldb spec")
+		}
+		_, ok := dsConfiguration["compression"].(string)
+		if !ok {
+			return errors.New("invalid compression field type in leveldb spec")
+		}
 	}
 
 	return nil

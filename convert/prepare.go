@@ -6,9 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	config "github.com/ipfs/ipfs-ds-convert/config"
-	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	"github.com/ipfs/ipfs-ds-convert/config"
 )
 
 func (c *conversion) checkRepoVersion() error {
@@ -35,6 +33,12 @@ func (c *conversion) loadSpecs() error {
 	if err != nil {
 		return err
 	}
+
+	_, err = config.Validate(oldSpec, true)
+	if err != nil {
+		return err
+	}
+
 	c.dsSpec = oldSpec
 
 	repoConfig := make(map[string]interface{})
@@ -53,22 +57,11 @@ func (c *conversion) loadSpecs() error {
 		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(c.path, ConfigFile))
 	}
 
+	_, err = config.Validate(dsSpec, false)
+	if err != nil {
+		return err
+	}
+
 	c.newDsSpec = dsSpec
-	return nil
-}
-
-func (c *conversion) validateSpecs() error {
-	oldPaths, err := config.Validate(c.dsSpec)
-	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, SpecsFile))
-	}
-	c.oldPaths = oldPaths
-
-	newPaths, err := config.Validate(c.newDsSpec)
-	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, ConfigFile))
-	}
-	c.newPaths = newPaths
-
 	return nil
 }
