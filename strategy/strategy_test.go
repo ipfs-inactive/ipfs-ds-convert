@@ -396,7 +396,7 @@ var (
 					},
 				},
 			},
-			err: "couldn't find best match for fromMount /bar",
+			err: "adding missing to src spec: couldn't find best match for specA /bar",
 		},
 	}
 )

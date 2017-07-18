@@ -19,7 +19,7 @@ const (
 	SpecsFile  = "datastore_spec"
 
 	SuppertedRepoVersion = 6
-	ToolVersion          = "0.0.1"
+	ToolVersion          = "0.1.1"
 )
 
 var Log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
@@ -30,8 +30,8 @@ type conversion struct {
 
 	path string
 
-	dsSpec    map[string]interface{}
-	newDsSpec map[string]interface{}
+	fromSpec map[string]interface{}
+	toSpec   map[string]interface{}
 }
 
 func Convert(repoPath string) error {
@@ -57,7 +57,7 @@ func Convert(repoPath string) error {
 		return err
 	}
 
-	s, err := strategy.NewStrategy(c.dsSpec, c.newDsSpec)
+	s, err := strategy.NewStrategy(c.fromSpec, c.toSpec)
 	if err != nil {
 		return c.wrapErr(err)
 	}
@@ -88,9 +88,6 @@ func Convert(repoPath string) error {
 		return c.wrapErr(err)
 	}
 
-	//TODO: may want to check config even though there is probably little that can
-	//go wrong unnoticed there
-
 	Log.Println("All tasks finished")
 	return nil
 }
@@ -99,7 +96,7 @@ func (c *conversion) saveNewSpec() (err error) {
 
 	specsPath := filepath.Join(c.path, SpecsFile)
 
-	err = ioutil.WriteFile(specsPath, []byte(repo.DatastoreSpec(c.newDsSpec)), 0660)
+	err = ioutil.WriteFile(specsPath, []byte(repo.DatastoreSpec(c.toSpec)), 0660)
 	if err != nil {
 		return err
 	}

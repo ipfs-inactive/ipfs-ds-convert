@@ -87,13 +87,13 @@ func TestLossyConvert(t *testing.T) {
 	//Convert!
 	err := convert.Convert(dir)
 	if err != nil {
-		if !strings.Contains(err.Error(), "couldn't find best match for fromMount /") {
+		if !strings.Contains(err.Error(), "adding missing to src spec: couldn't find best match for specA /") {
 			t.Fatal(err)
 		}
 		return
 	}
 
-	t.Errorf("expected error 'couldn't find best match for fromMount /'")
+	t.Errorf("expected error 'adding missing to src spec: couldn't find best match for specA /'")
 }
 
 //should cover noop case in convert.go

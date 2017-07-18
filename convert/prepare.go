@@ -51,7 +51,7 @@ func (c *conversion) loadSpecs() error {
 		return err
 	}
 
-	c.dsSpec = oldSpec
+	c.fromSpec = oldSpec
 
 	repoConfig := make(map[string]interface{})
 	err = LoadConfig(filepath.Join(c.path, ConfigFile), &repoConfig)
@@ -74,6 +74,6 @@ func (c *conversion) loadSpecs() error {
 		return err
 	}
 
-	c.newDsSpec = dsSpec
+	c.toSpec = dsSpec
 	return nil
 }

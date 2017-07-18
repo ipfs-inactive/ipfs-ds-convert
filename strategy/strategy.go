@@ -29,6 +29,44 @@ var simpleTypes = map[string]bool{
 	"badgerds": true,
 }
 
+func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) {
+	fromSpec, err := cleanUp(fromSpecIn)
+	if err != nil {
+		return nil, err
+	}
+
+	toSpec, err := cleanUp(toSpecIn)
+	if err != nil {
+		return nil, err
+	}
+
+	fromType, _ := fromSpec.Type()
+	toType, _ := toSpec.Type()
+
+	if _, ok := dsTypes[fromType]; ok {
+		if toType == fromType {
+			//TODO: check if dirs match, can just skip conversion, else just move directories
+			return NewCopyStrategy(fromSpec, toSpec)
+		}
+
+		//TODO: might still be able to optimize if toType is single element mount
+		return NewCopyStrategy(fromSpec, toSpec)
+	}
+
+	if fromType == "mount" {
+		if toType != "mount" {
+			//TODO: this can be possible to optimize in case there is only one element
+			//in mount, but it's probably not worth it
+			return NewCopyStrategy(fromSpec, toSpec)
+		}
+
+		return newMountStrategy(fromSpec, toSpec)
+	}
+
+	//should not normally happen
+	return nil, errors.New("unable to create conversion strategy")
+}
+
 func cleanUp(specIn Spec) (Spec, error) {
 	t, ok := specIn.Type()
 	if !ok {
@@ -128,151 +166,104 @@ func simpleMountInfo(mountSpec Spec) (SimpleMounts, error) {
 	return simpleMounts, nil
 }
 
-//TODO: wire up to main process, cleanup
-func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) {
-	fromSpec, err := cleanUp(fromSpecIn)
-	if err != nil {
-		return nil, err
-	}
+// addMissingParents adds missing roots to filtered specs
+// spec A (source)
+// /a
+// /a/b
+//
+// spec B (dest)
+// /a
+//
+// Assuming /a are matching, they are filtered out and so data from /a/b would
+// be lost. This function adds missing mounts back to optimized spec.
+// Returns fixed SpecAOpt, SpecBOpt
+func addMissingParents(specA SimpleMounts, specB SimpleMounts, specAOpt SimpleMounts, specBOpt SimpleMounts) (SimpleMounts, SimpleMounts, error) {
+	for _, mountA := range specA {
+		if specB.hasPrefixed(mountA) == -1 {
+			var bestMatch SimpleMount
+			bestMatched := -1
+			toParts := mountA.prefix.List()
 
-	toSpec, err := cleanUp(toSpecIn)
-	if err != nil {
-		return nil, err
-	}
-
-	fromType, _ := fromSpec.Type()
-	toType, _ := toSpec.Type()
-
-	if _, ok := dsTypes[fromType]; ok {
-		if toType == fromType {
-			//TODO: check if dirs match, can just skip conversion, else just move directories
-			return NewCopyStrategy(fromSpec, toSpec)
-		}
-
-		//TODO: might still be able to optimize if toType is single element mount
-		return NewCopyStrategy(fromSpec, toSpec)
-	}
-
-	if fromType == "mount" {
-		if toType != "mount" {
-			//TODO: this can be possible to optimize in case there is only one element
-			//in mount, but it's probably not worth it
-			return NewCopyStrategy(fromSpec, toSpec)
-		}
-
-		//TODO create more test cases
-
-		//TODO: see if duplicate mount prefix is filtered out
-		var skipable []SimpleMount
-
-		fromMounts, err := simpleMountInfo(fromSpec)
-		if err != nil {
-			return nil, errors.Wrapf(err, "parsing old spec")
-		}
-
-		toMounts, err := simpleMountInfo(toSpec)
-		if err != nil {
-			return nil, errors.Wrapf(err, "parsing new spec")
-		}
-
-		for _, from := range fromMounts {
-			if toMounts.hasMatching(from) {
-				skipable = append(skipable, from)
-			}
-		}
-
-		//TODO: handle renames, somehow
-
-		fromMountsOpt := fromMounts.filter(skipable)
-		toMountsOpt := toMounts.filter(skipable)
-
-		fromMountsOpt.sort()
-		toMountsOpt.sort()
-
-		for _, toMount := range toMountsOpt {
-			if fromMounts.hasPrefixed(toMount) == -1 {
-				var bestMatch SimpleMount
-				bestMatched := -1
-				toParts := toMount.prefix.List()
-
-				for _, fromMount := range fromMounts {
-					matched := matchStringsPrefix(toParts, fromMount.prefix.List())
-					if matched > bestMatched {
-						bestMatched = matched
-						bestMatch = fromMount
-					}
-				}
-
-				if bestMatched == -1 {
-					return nil, fmt.Errorf("couldn't find best match for toMount %s", toMount.prefix.String())
-				}
-
-				if fromMountsOpt.hasPrefixed(bestMatch) == -1 {
-					fromMountsOpt = append(fromMountsOpt, bestMatch)
-				}
-				if toMountsOpt.hasPrefixed(bestMatch) == -1 {
-					ti := toMounts.hasPrefixed(bestMatch)
-					if ti == -1 {
-						//TODO: fallback to copyAll
-						return nil, fmt.Errorf("couldn't find %s in toMounts, parent of %s", bestMatch.prefix.String(), toMount)
-					}
-					toMountsOpt = append(toMountsOpt, toMounts[ti])
+			for _, mountB := range specB {
+				matched := matchKeyPartsPrefix(toParts, mountB.prefix.List())
+				if matched > bestMatched {
+					bestMatched = matched
+					bestMatch = mountB
 				}
 			}
-		}
 
-		//TODO: Deduplicate
-		for _, fromMount := range fromMountsOpt {
-			if toMounts.hasPrefixed(fromMount) == -1 {
-				var bestMatch SimpleMount
-				bestMatched := -1
-				fromParts := fromMount.prefix.List()
-
-				for _, toMount := range toMounts {
-					matched := matchStringsPrefix(fromParts, toMount.prefix.List())
-					if matched > bestMatched {
-						bestMatched = matched
-						bestMatch = toMount
-					}
-				}
-
-				if bestMatched == -1 {
-					return nil, fmt.Errorf("couldn't find best match for fromMount %s", fromMount.prefix.String())
-				}
-
-				if toMountsOpt.hasPrefixed(bestMatch) == -1 {
-					toMountsOpt = append(toMountsOpt, bestMatch)
-				}
-				if fromMountsOpt.hasPrefixed(bestMatch) == -1 {
-					ti := fromMounts.hasPrefixed(bestMatch)
-					if ti == -1 {
-						//TODO: fallback to copyAll
-						return nil, fmt.Errorf("couldn't find %s in fromMounts, parent of %s", bestMatch.prefix.String(), fromMount)
-					}
-					fromMountsOpt = append(fromMountsOpt, fromMounts[ti])
-				}
-			}
-		}
-
-		if len(fromMountsOpt) == 0 {
-			if len(toMountsOpt) != 0 {
-				return nil, fmt.Errorf("strategy error: len(toMounts) != 0, please report")
+			if bestMatched == -1 {
+				return nil, nil, fmt.Errorf("couldn't find best match for specA %s", mountA.prefix.String())
 			}
 
-			return NewNoopStrategy()
+			if specBOpt.hasPrefixed(bestMatch) == -1 {
+				specBOpt = append(specBOpt, bestMatch)
+			}
+			if specAOpt.hasPrefixed(bestMatch) == -1 {
+				ti := specA.hasPrefixed(bestMatch)
+				if ti == -1 {
+					//TODO: fallback to copyAll
+					return nil, nil, fmt.Errorf("couldn't find %s in specA, parent of %s", bestMatch.prefix.String(), mountA)
+				}
+				specAOpt = append(specAOpt, specA[ti])
+			}
 		}
-		if len(toMountsOpt) == 0 {
-			return nil, fmt.Errorf("strategy error: len(toMounts) == 0, please report")
-		}
-
-		return NewCopyStrategy(fromMountsOpt.spec(), toMountsOpt.spec())
 	}
-
-	//should not normally happen
-	return nil, errors.New("unable to create conversion strategy")
+	return specAOpt, specBOpt, nil
 }
 
-func matchStringsPrefix(pattern, to []string) int {
+func newMountStrategy(fromSpec, toSpec map[string]interface{}) (Strategy, error) {
+	var skipable []SimpleMount
+
+	fromMounts, err := simpleMountInfo(fromSpec)
+	if err != nil {
+		return nil, errors.Wrapf(err, "parsing old spec")
+	}
+
+	toMounts, err := simpleMountInfo(toSpec)
+	if err != nil {
+		return nil, errors.Wrapf(err, "parsing new spec")
+	}
+
+	for _, from := range fromMounts {
+		if toMounts.hasMatching(from) {
+			skipable = append(skipable, from)
+		}
+	}
+
+	//TODO: handle renames, somehow
+
+	fromMountsOpt := fromMounts.filter(skipable)
+	toMountsOpt := toMounts.filter(skipable)
+
+	fromMountsOpt.sort()
+	toMountsOpt.sort()
+
+	toMountsOpt, fromMountsOpt, err = addMissingParents(fromMounts, toMounts, fromMountsOpt, toMountsOpt)
+	if err != nil {
+		return nil, errors.Wrapf(err, "adding missing to src spec")
+	}
+
+	fromMountsOpt, toMountsOpt, err = addMissingParents(toMounts, fromMounts, toMountsOpt, fromMountsOpt)
+	if err != nil {
+		return nil, errors.Wrapf(err, "adding missing to dest spec")
+	}
+
+	if len(fromMountsOpt) == 0 {
+		if len(toMountsOpt) != 0 {
+			return nil, fmt.Errorf("strategy error: len(toMounts) != 0, please report")
+		}
+
+		return NewNoopStrategy()
+	}
+	if len(toMountsOpt) == 0 {
+		return nil, fmt.Errorf("strategy error: len(toMounts) == 0, please report")
+	}
+
+	return NewCopyStrategy(fromMountsOpt.spec(), toMountsOpt.spec())
+}
+
+func matchKeyPartsPrefix(pattern, to []string) int {
 	if len(pattern) == 1 && pattern[0] == "" {
 		pattern = []string{}
 	}

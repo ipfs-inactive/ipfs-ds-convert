@@ -229,8 +229,7 @@ func FlatfsDatastoreConfig(params map[string]interface{}) (DatastoreConfig, erro
 
 	c.syncField, ok = params["sync"].(bool)
 	if !ok {
-		//TODO: temp hack to get around missing runtime fields in datastore_spec
-		c.syncField = true
+		return nil, fmt.Errorf("'sync' field is missing or not a boolean")
 	}
 	return &c, nil
 }

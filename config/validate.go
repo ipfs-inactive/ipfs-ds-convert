@@ -83,6 +83,19 @@ func flatfsValidator(ctx *validatorContext, dsConfiguration map[string]interface
 		return err
 	}
 
+	_, ok := dsConfiguration["sync"]
+	if !ok && ctx.fillDefault {
+		dsConfiguration["sync"] = true
+	} else {
+		if !ok {
+			return errors.New("no sync field in flatfs spec")
+		}
+		_, ok := dsConfiguration["sync"].(bool)
+		if !ok {
+			return errors.New("invalid sync field type in flatfs spec")
+		}
+	}
+
 	return nil
 }
 
