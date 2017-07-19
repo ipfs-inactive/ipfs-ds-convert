@@ -281,17 +281,10 @@ func (c *Copy) swapDatastores() (err error) {
 	c.logStep("move new DS from %s", c.oldDsDir)
 
 	//check if toDs dir is empty
-	dir, err := os.Open(c.newDsDir)
+	err = checkDirEmpty(c.newDsDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open %s", c.newDsDir)
+		return err
 	}
-
-	_, err = dir.Readdirnames(1)
-	if err != io.EOF {
-		dir.Close()
-		return fmt.Errorf("%s was not empty after swapping repos", c.newDsDir)
-	}
-	dir.Close()
 
 	err = os.Remove(c.newDsDir)
 	if err != nil {
@@ -370,4 +363,32 @@ func (c *Copy) closeDatastores() error {
 	}
 	c.logStep("close new datastore")
 	return nil
+}
+
+func (c *Copy) Clean() error {
+	err := c.log.Log(revert.ActionManual, "no backup data present for revert")
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(c.oldDsDir)
+	if err != nil {
+		return fmt.Errorf("failed to remove oldDsDir temp directory")
+	}
+
+	return nil
+}
+
+func checkDirEmpty(path string) error {
+	dir, err := os.Open(path)
+	if err != nil {
+		return errors.Wrapf(err, "failed to open %s", path)
+	}
+
+	_, err = dir.Readdirnames(1)
+	if err != io.EOF {
+		dir.Close()
+		return fmt.Errorf("%s is not empty", path)
+	}
+	return dir.Close()
 }

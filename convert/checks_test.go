@@ -26,7 +26,7 @@ func TestInvalidRepoVersion(t *testing.T) {
 	}
 
 	//Convert!
-	err = convert.Convert(dir)
+	err = convert.Convert(dir, false)
 	if err == nil {
 		t.Fatal(fmt.Errorf("No error, expected invalid repo version"))
 	}
@@ -48,7 +48,7 @@ func TestLockedRepo(t *testing.T) {
 	defer unlock.Close()
 
 	//Convert!
-	err = convert.Convert(dir)
+	err = convert.Convert(dir, false)
 	if err == nil {
 		t.Fatal(fmt.Errorf("No error, expected invalid repo version"))
 	}
@@ -66,7 +66,7 @@ func TestInvalidSpec(t *testing.T) {
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/invalidSpec")
 
 	//Convert!
-	err := convert.Convert(dir)
+	err := convert.Convert(dir, false)
 	if err == nil {
 		t.Fatal(fmt.Errorf("No error, expected error validating datastore spec"))
 	}
@@ -84,7 +84,7 @@ func TestAbsolutePathSpec(t *testing.T) {
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/absPathSpec")
 
 	//Convert!
-	err := convert.Convert(dir)
+	err := convert.Convert(dir, false)
 	if err == nil {
 		t.Fatal(fmt.Errorf("No error, expected error validating datastore spec"))
 	}
@@ -102,7 +102,7 @@ func TestReusePathSpec(t *testing.T) {
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/reusePathSpec")
 
 	//Convert!
-	err := convert.Convert(dir)
+	err := convert.Convert(dir, false)
 	if err == nil {
 		t.Fatal(fmt.Errorf("No error, expected error validating datastore spec"))
 	}
@@ -123,7 +123,7 @@ func TestROSpec(t *testing.T) {
 	}
 
 	//Convert!
-	err := convert.Convert(dir)
+	err := convert.Convert(dir, false)
 	if err == nil {
 		t.Fatal(fmt.Errorf("No error, expected error validating datastore spec"))
 	}

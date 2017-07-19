@@ -69,7 +69,7 @@ func TestBasicConvert(t *testing.T) {
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/badgerSpec")
 
 	//Convert!
-	err := convert.Convert(dir)
+	err := convert.Convert(dir, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestLossyConvert(t *testing.T) {
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/lossySpec")
 
 	//Convert!
-	err := convert.Convert(dir)
+	err := convert.Convert(dir, false)
 	if err != nil {
 		if !strings.Contains(err.Error(), "adding missing to src spec: couldn't find best match for specA /") {
 			t.Fatal(err)
@@ -105,7 +105,7 @@ func TestNoopConvert(t *testing.T) {
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/equalSpec")
 
 	//Convert!
-	err := convert.Convert(dir)
+	err := convert.Convert(dir, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +147,7 @@ func TestSkipCopyConvert(t *testing.T) {
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/skipableDstSpec")
 
-	err = convert.Convert(dir)
+	err = convert.Convert(dir, false)
 	if err != nil {
 		t.Fatal(err)
 	}

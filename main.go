@@ -47,15 +47,25 @@ ipfs configuration and repo specs.
 
 IPFS_PATH environmental variable is respected
 	`,
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name: "keep",
+			Usage: "don't remove backup files after successful conversion",
+		},
+	},
 	Action: func(c *cli.Context) error {
 		baseDir, err := getBaseDir()
 		if err != nil {
 			return err
 		}
 
-		return convert.Convert(baseDir)
+		return convert.Convert(baseDir, c.Bool("keep"))
 	},
 }
+
+//TODO: Patch config util command
+
+//TODO: revert command
 
 func getBaseDir() (string, error) {
 	baseDir := os.Getenv(EnvDir)

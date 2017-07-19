@@ -1,6 +1,7 @@
 package convert
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -8,9 +9,9 @@ import (
 	logging "log"
 
 	"github.com/ipfs/ipfs-ds-convert/repo"
+	"github.com/ipfs/ipfs-ds-convert/revert"
 	"github.com/ipfs/ipfs-ds-convert/strategy"
 
-	"github.com/ipfs/ipfs-ds-convert/revert"
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 )
 
@@ -36,7 +37,7 @@ type conversion struct {
 	toSpec   map[string]interface{}
 }
 
-func Convert(repoPath string) error {
+func Convert(repoPath string, keepBackup bool) error {
 	c := conversion{
 		path: repoPath,
 	}
@@ -87,19 +88,23 @@ func Convert(repoPath string) error {
 		if err != nil {
 			return c.wrapErr(err)
 		}
+
+		if !keepBackup {
+			err = copy.Clean()
+			if err != nil {
+				return c.wrapErr(err)
+			}
+		}
 	case "noop":
 	}
 
-	err = c.log.Log(revert.ActionManual, "restore datastore_spec to previous state")
-	if err != nil {
-		return err
-	}
-
 	Log.Println("Saving new spec")
-	err = c.saveNewSpec()
+	err = c.saveNewSpec(keepBackup)
 	if err != nil {
 		return c.wrapErr(err)
 	}
+
+	c.log.Log(revert.ActionDone)
 
 	err = c.log.CloseFinal()
 	if err != nil {
@@ -110,13 +115,54 @@ func Convert(repoPath string) error {
 	return nil
 }
 
-func (c *conversion) saveNewSpec() (err error) {
+func (c *conversion) saveNewSpec(backup bool) (err error) {
 
-	specsPath := filepath.Join(c.path, SpecsFile)
+	if backup {
+		backupFile, err := ioutil.TempFile(c.path, "datastore_spec_backup")
+		if err != nil {
+			return err
+		}
 
-	err = ioutil.WriteFile(specsPath, []byte(repo.DatastoreSpec(c.toSpec)), 0660)
+		specData, err := ioutil.ReadFile(filepath.Join(c.path, SpecsFile))
+		if err != nil {
+			return err
+		}
+
+		n, err := backupFile.Write(specData)
+		if err != nil {
+			return err
+		}
+
+		if n != len(specData) {
+			return fmt.Errorf("failed to create backup of datastore_spec")
+		}
+
+		err = c.log.Log(revert.ActionMove, backupFile.Name(), filepath.Join(c.path, SpecsFile))
+		if err != nil {
+			return err
+		}
+
+		err = backupFile.Close()
+		if err != nil {
+			return err
+		}
+	} else {
+		err = c.log.Log(revert.ActionManual, "restore datastore_spec to previous state")
+		if err != nil {
+			return err
+		}
+	}
+
+	err = ioutil.WriteFile(filepath.Join(c.path, SpecsFile), []byte(repo.DatastoreSpec(c.toSpec)), 0660)
 	if err != nil {
 		return err
+	}
+
+	if backup {
+		err = c.log.Log(revert.ActionRemove, filepath.Join(c.path, SpecsFile))
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

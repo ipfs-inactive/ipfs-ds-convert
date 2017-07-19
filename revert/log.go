@@ -13,6 +13,7 @@ const (
 	ActionRemove = Action("rm")
 	ActionMove   = Action("mv")
 	ActionMkdir  = Action("mkdir")
+	ActionDone   = Action("done")
 
 	//For breaking things that can't be easily recovered from, say writing new spec
 	ActionManual = Action("manual")
