@@ -71,12 +71,12 @@ func OpenDatastore(path string, params map[string]interface{}) (Datastore, error
 	}, nil
 }
 
-func DatastoreSpec(params map[string]interface{}) string {
+func DatastoreSpec(params map[string]interface{}) (string, error) {
 	dsc, err := AnyDatastoreConfig(params)
 	if err != nil {
-		return ""
+		return "", err
 	}
-	return dsc.DiskSpec().String()
+	return dsc.DiskSpec().String(), nil
 }
 
 // From https://github.com/ipfs/go-ipfs/blob/8525be5990d3a0b5ece0d6773764756f9cbf15e9/repo/fsrepo/datastores.go

@@ -32,7 +32,7 @@ func (s *Spec) Sub(key string) (Spec, bool) {
 	return ts, ok
 }
 
-func (s *Spec) Id() string {
+func (s *Spec) Id() (string, error) {
 	return repo.DatastoreSpec(*s)
 }
 

@@ -33,10 +33,10 @@ func main() {
 	app.Commands = []cli.Command{
 		ConvertCommand,
 	}
-
 	if err := app.Run(os.Args); err != nil {
 		convert.Log.Fatal(err)
 	}
+
 }
 
 var ConvertCommand = cli.Command{
@@ -49,17 +49,21 @@ IPFS_PATH environmental variable is respected
 	`,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
-			Name: "keep",
+			Name:  "keep",
 			Usage: "don't remove backup files after successful conversion",
 		},
 	},
 	Action: func(c *cli.Context) error {
 		baseDir, err := getBaseDir()
 		if err != nil {
-			return err
+			convert.Log.Fatal(err)
 		}
 
-		return convert.Convert(baseDir, c.Bool("keep"))
+		err = convert.Convert(baseDir, c.Bool("keep"))
+		if err != nil {
+			convert.Log.Fatal(err)
+		}
+		return err
 	},
 }
 

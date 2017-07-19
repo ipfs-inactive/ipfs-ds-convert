@@ -153,7 +153,12 @@ func (c *conversion) saveNewSpec(backup bool) (err error) {
 		}
 	}
 
-	err = ioutil.WriteFile(filepath.Join(c.path, SpecsFile), []byte(repo.DatastoreSpec(c.toSpec)), 0660)
+	toDiskId, err := repo.DatastoreSpec(c.toSpec)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(filepath.Join(c.path, SpecsFile), []byte(toDiskId), 0660)
 	if err != nil {
 		return err
 	}

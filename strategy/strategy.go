@@ -30,12 +30,15 @@ var simpleTypes = map[string]bool{
 }
 
 func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) {
+	var fromSpec Spec
+	var toSpec Spec
+
 	fromSpec, err := cleanUp(fromSpecIn)
 	if err != nil {
 		return nil, err
 	}
 
-	toSpec, err := cleanUp(toSpecIn)
+	toSpec, err = cleanUp(toSpecIn)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +70,7 @@ func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) 
 	return nil, errors.New("unable to create conversion strategy")
 }
 
-func cleanUp(specIn Spec) (Spec, error) {
+func cleanUp(specIn Spec) (map[string]interface{}, error) {
 	t, ok := specIn.Type()
 	if !ok {
 		return nil, errors.New("invalid or missing 'type' in datastore spec")
@@ -140,7 +143,8 @@ func simpleMountInfo(mountSpec Spec) (SimpleMounts, error) {
 
 	var simpleMounts []SimpleMount
 	for _, m := range mounts {
-		mount, ok := m.(Spec)
+		var mount Spec
+		mount, ok := m.(map[string]interface{})
 		if !ok {
 			return nil, fmt.Errorf("'mounts' element is of invalid type")
 		}
@@ -160,7 +164,12 @@ func simpleMountInfo(mountSpec Spec) (SimpleMounts, error) {
 			return nil, fmt.Errorf("mount field 'mountpoint' is not defined or of invalid type")
 		}
 
-		simpleMounts = append(simpleMounts, SimpleMount{prefix: ds.NewKey(prefix), diskId: repo.DatastoreSpec(mount), spec: mount})
+		diskId, err := repo.DatastoreSpec(mount)
+		if err != nil {
+			return nil, err
+		}
+
+		simpleMounts = append(simpleMounts, SimpleMount{prefix: ds.NewKey(prefix), diskId: diskId, spec: mount})
 	}
 
 	return simpleMounts, nil

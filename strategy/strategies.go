@@ -46,10 +46,10 @@ func validateCopySpec(spec Spec) error {
 
 func NewCopyStrategy(fromSpec Spec, toSpec Spec) (Strategy, error) {
 	if err := validateCopySpec(fromSpec); err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "validating old copy spec")
 	}
 	if err := validateCopySpec(toSpec); err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "validating new copy spec")
 	}
 
 	return &copyStrategy{

@@ -48,7 +48,7 @@ func (c *conversion) loadSpecs() error {
 
 	_, err = config.Validate(oldSpec, true)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "validating datastore_spec spec")
 	}
 
 	c.fromSpec = oldSpec
@@ -71,7 +71,7 @@ func (c *conversion) loadSpecs() error {
 
 	_, err = config.Validate(dsSpec, false)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "validating new spec")
 	}
 
 	c.toSpec = dsSpec
