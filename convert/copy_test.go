@@ -17,7 +17,7 @@ var (
 )
 
 func TestInvalidSpecLeft(t *testing.T) {
-	c := NewCopy("/tmp/", InvalidSpec, ValidSpec, func(string, ...interface{}) {})
+	c := NewCopy("/tmp/", InvalidSpec, ValidSpec, nil, func(string, ...interface{}) {})
 	err := c.Run()
 	if err != nil {
 		if strings.Contains(err.Error(), "error validating datastore spec in /tmp/datastore_spec: invalid type entry in config") {
@@ -30,7 +30,7 @@ func TestInvalidSpecLeft(t *testing.T) {
 }
 
 func TestInvalidSpecRight(t *testing.T) {
-	c := NewCopy("/tmp/", ValidSpec, InvalidSpec, func(string, ...interface{}) {})
+	c := NewCopy("/tmp/", ValidSpec, InvalidSpec, nil, func(string, ...interface{}) {})
 	err := c.Run()
 	if err != nil {
 		if strings.Contains(err.Error(), "error validating datastore spec in /tmp/config: invalid type entry in config") {
@@ -43,7 +43,7 @@ func TestInvalidSpecRight(t *testing.T) {
 }
 
 func TestOpenNonexist(t *testing.T) {
-	c := NewCopy("/tmp/hopefully/nonexistent/repo", ValidSpec, ValidSpec, func(string, ...interface{}) {})
+	c := NewCopy("/tmp/hopefully/nonexistent/repo", ValidSpec, ValidSpec, nil, func(string, ...interface{}) {})
 	err := c.Run()
 	if err != nil {
 		if strings.Contains(err.Error(), "error opening datastore at /tmp/hopefully/nonexistent/repo: mkdir /tmp/hopefully/nonexistent/repo/blocks: no such file or directory") {

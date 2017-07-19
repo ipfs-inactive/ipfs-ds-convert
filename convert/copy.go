@@ -12,6 +12,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/strategy"
 
+	"github.com/ipfs/ipfs-ds-convert/revert"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
@@ -32,14 +33,16 @@ type Copy struct {
 	fromDs repo.Datastore
 	toDs   repo.Datastore
 
+	log     *revert.ActionLogger
 	logStep func(string, ...interface{})
 }
 
-func NewCopy(path string, fromSpec strategy.Spec, toSpec strategy.Spec, logStep func(string, ...interface{})) *Copy {
+func NewCopy(path string, fromSpec strategy.Spec, toSpec strategy.Spec, log *revert.ActionLogger, logStep func(string, ...interface{})) *Copy {
 	return &Copy{
 		path:     path,
 		fromSpec: fromSpec,
 		toSpec:   toSpec,
+		log:      log,
 		logStep:  logStep,
 	}
 }
@@ -127,6 +130,12 @@ func (c *Copy) openDatastores() (err error) {
 	if err != nil {
 		return errors.Wrapf(err, "error creating temp datastore at %s", c.path)
 	}
+
+	err = c.log.Log(revert.ActionRemove, c.newDsDir)
+	if err != nil {
+		return err
+	}
+
 	c.logStep("create temp datastore directory at %s", c.newDsDir)
 
 	c.toDs, err = repo.OpenDatastore(c.newDsDir, c.toSpec)
@@ -223,6 +232,12 @@ func (c *Copy) swapDatastores() (err error) {
 	if err != nil {
 		return errors.Wrapf(err, "error creating temp datastore at %s", c.path)
 	}
+
+	err = c.log.Log(revert.ActionRemove, c.oldDsDir)
+	if err != nil {
+		return err
+	}
+
 	c.logStep("create temp datastore directory at %s", c.oldDsDir)
 
 	//TODO: Check if old dirs aren't mount points
@@ -231,6 +246,12 @@ func (c *Copy) swapDatastores() (err error) {
 		if err != nil {
 			return errors.Wrapf(err, "error moving old datastore dir %s to %s", dir, c.oldDsDir)
 		}
+
+		err = c.log.Log(revert.ActionMove, path.Join(c.oldDsDir, dir), path.Join(c.path, dir))
+		if err != nil {
+			return err
+		}
+
 		c.logStep("> move %s to %s", path.Join(c.path, dir), path.Join(c.oldDsDir, dir))
 
 		//Those are theoretically not needed, but having them won't hurt
@@ -249,6 +270,12 @@ func (c *Copy) swapDatastores() (err error) {
 		if err != nil {
 			return errors.Wrapf(err, "error moving new datastore dir %s from %s", dir, c.newDsDir)
 		}
+
+		err = c.log.Log(revert.ActionMove, path.Join(c.path, dir), path.Join(c.newDsDir, dir))
+		if err != nil {
+			return err
+		}
+
 		c.logStep("> move %s to %s", path.Join(c.newDsDir, dir), path.Join(c.path, dir))
 	}
 	c.logStep("move new DS from %s", c.oldDsDir)
@@ -269,6 +296,11 @@ func (c *Copy) swapDatastores() (err error) {
 	err = os.Remove(c.newDsDir)
 	if err != nil {
 		return fmt.Errorf("failed to remove toDs temp directory after swapping repos")
+	}
+
+	err = c.log.Log(revert.ActionMkdir, c.newDsDir)
+	if err != nil {
+		return err
 	}
 
 	c.logStep("remove temp toDs directory %s", c.newDsDir)

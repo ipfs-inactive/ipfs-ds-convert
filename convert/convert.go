@@ -11,6 +11,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/strategy"
 
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
+	"github.com/ipfs/ipfs-ds-convert/revert"
 )
 
 const (
@@ -27,6 +28,7 @@ var Log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
 // conversion holds conversion state and progress
 type conversion struct {
 	steps []string
+	log *revert.ActionLogger
 
 	path string
 
@@ -52,6 +54,12 @@ func Convert(repoPath string) error {
 	}
 	defer unlock.Close()
 
+	c.log, err = revert.NewActionLogger(c.path)
+	if err != nil {
+		return err
+	}
+	defer c.log.Close()
+
 	err = c.loadSpecs()
 	if err != nil {
 		return err
@@ -69,7 +77,7 @@ func Convert(repoPath string) error {
 		from, _ := strat.Sub("from")
 		to, _ := strat.Sub("to")
 
-		copy := NewCopy(c.path, from, to, c.addStep)
+		copy := NewCopy(c.path, from, to, c.log, c.addStep)
 		err := copy.Run()
 		if err != nil {
 			return c.wrapErr(err)
@@ -82,10 +90,20 @@ func Convert(repoPath string) error {
 	case "noop":
 	}
 
+	err = c.log.Log(revert.ActionManual, "restore datastore_spec to previous state")
+	if err != nil {
+		return err
+	}
+
 	Log.Println("Saving new spec")
 	err = c.saveNewSpec()
 	if err != nil {
 		return c.wrapErr(err)
+	}
+
+	err = c.log.CloseFinal()
+	if err != nil {
+		return err
 	}
 
 	Log.Println("All tasks finished")
