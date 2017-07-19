@@ -236,7 +236,7 @@ var (
 						"path":       "dsb",
 					},
 					map[string]interface{}{
-						"type": "mount",
+						"type":       "mount",
 						"mountpoint": "/c",
 						"mounts": []interface{}{
 							map[string]interface{}{

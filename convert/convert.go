@@ -10,8 +10,8 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/strategy"
 
-	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 	"github.com/ipfs/ipfs-ds-convert/revert"
+	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 )
 
 const (
@@ -28,7 +28,7 @@ var Log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
 // conversion holds conversion state and progress
 type conversion struct {
 	steps []string
-	log *revert.ActionLogger
+	log   *revert.ActionLogger
 
 	path string
 

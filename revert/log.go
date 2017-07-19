@@ -11,8 +11,8 @@ const (
 	ConvertLog = "convertlog"
 
 	ActionRemove = Action("rm")
-	ActionMove = Action("mv")
-	ActionMkdir = Action("mkdir")
+	ActionMove   = Action("mv")
+	ActionMkdir  = Action("mkdir")
 
 	//For breaking things that can't be easily recovered from, say writing new spec
 	ActionManual = Action("manual")
@@ -44,7 +44,7 @@ func NewActionLogger(repoPath string) (*ActionLogger, error) {
 }
 
 func (a *ActionLogger) Log(action Action, params ...string) error {
-	d, err := action.Line()
+	d, err := action.Line(params...)
 	if err != nil {
 		return err
 	}
