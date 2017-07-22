@@ -3,16 +3,17 @@ package convert_test
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/ipfs/ipfs-ds-convert/convert"
+	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
-	"os"
 )
 
 func TestInvalidRepoVersion(t *testing.T) {
@@ -118,7 +119,7 @@ func TestROSpec(t *testing.T) {
 	defer _close(t)
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/badgerSpec")
-	if err := os.Chmod(path.Join(dir, convert.SpecsFile), 0400); err != nil {
+	if err := os.Chmod(path.Join(dir, repo.SpecsFile), 0400); err != nil {
 		t.Fatal(err)
 	}
 
