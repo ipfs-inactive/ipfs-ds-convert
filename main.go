@@ -7,6 +7,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/convert"
 	homedir "github.com/mitchellh/go-homedir"
 	cli "gx/ipfs/QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K/cli"
+	"github.com/ipfs/ipfs-ds-convert/revert"
 )
 
 const (
@@ -32,6 +33,7 @@ func main() {
 
 	app.Commands = []cli.Command{
 		ConvertCommand,
+		RevertCommand,
 	}
 	if err := app.Run(os.Args); err != nil {
 		convert.Log.Fatal(err)
@@ -44,6 +46,12 @@ var ConvertCommand = cli.Command{
 	Usage: "convert datastore setup",
 	Description: `'convert' converts existing ipfs datastore setup to another based on the
 ipfs configuration and repo specs.
+
+Note that depending on configuration you are converting to up to double the
+disk space may be required.
+
+If you have any doubts about your configuration, run the tool conversion with
+--keep option enabled
 
 IPFS_PATH environmental variable is respected
 	`,
@@ -67,9 +75,46 @@ IPFS_PATH environmental variable is respected
 	},
 }
 
-//TODO: Patch config util command
+var RevertCommand = cli.Command{
+	Name:  "revert",
+	Usage: "revert conversion steps",
+	Description: `'reverts' attempts to revert changes done to ipfs repo by 'convert'.
+It's possible to run revert when conversion failed in middle of the process or
+if it was run with --keep option enabled.
 
-//TODO: revert command
+Note that in some cases revert may fail in a non-graceful way. When running
+revert after other programs used the datastore (like ipfs daemon), changes made
+by it between 'convert' and 'revert' may be lost. This may lead to repo
+corruption in extreme cases.
+
+Use this command with care, make sure you have some free disk space.
+If you have any important data in the repo it's highly recommended to backup the
+repo before running this command if you haven't already.
+
+IPFS_PATH environmental variable is respected
+	`,
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name:  "force",
+			Usage: "revert even if last conversion was successful",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		baseDir, err := getBaseDir()
+		if err != nil {
+			convert.Log.Fatal(err)
+		}
+
+		err = revert.Revert(baseDir, c.Bool("force"))
+		if err != nil {
+			convert.Log.Fatal(err)
+		}
+		return err
+	},
+}
+
+//TODO: Patch config util command
+//TODO: Cleanup command
 
 func getBaseDir() (string, error) {
 	baseDir := os.Getenv(EnvDir)

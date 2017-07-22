@@ -9,11 +9,12 @@ import (
 	"strings"
 
 	"github.com/ipfs/ipfs-ds-convert/config"
+	"github.com/ipfs/ipfs-ds-convert/repo"
 
 	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 )
 
-func (c *conversion) checkRepoVersion() error {
+func (c *Conversion) checkRepoVersion() error {
 	vstr, err := ioutil.ReadFile(filepath.Join(c.path, "version"))
 	if err != nil {
 		return err
@@ -24,15 +25,15 @@ func (c *conversion) checkRepoVersion() error {
 		return err
 	}
 
-	if version != SuppertedRepoVersion {
+	if version != repo.SuppertedRepoVersion {
 		return fmt.Errorf("unsupported fsrepo version: %d", version)
 	}
 
 	return nil
 }
 
-func (c *conversion) loadSpecs() error {
-	specStat, err := os.Stat(filepath.Join(c.path, SpecsFile))
+func (c *Conversion) loadSpecs() error {
+	specStat, err := os.Stat(filepath.Join(c.path, repo.SpecsFile))
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -41,7 +42,7 @@ func (c *conversion) loadSpecs() error {
 	}
 
 	oldSpec := make(map[string]interface{})
-	err = LoadConfig(filepath.Join(c.path, SpecsFile), &oldSpec)
+	err = LoadConfig(filepath.Join(c.path, repo.SpecsFile), &oldSpec)
 	if err != nil {
 		return err
 	}
@@ -54,19 +55,19 @@ func (c *conversion) loadSpecs() error {
 	c.fromSpec = oldSpec
 
 	repoConfig := make(map[string]interface{})
-	err = LoadConfig(filepath.Join(c.path, ConfigFile), &repoConfig)
+	err = LoadConfig(filepath.Join(c.path, repo.ConfigFile), &repoConfig)
 	if err != nil {
 		return err
 	}
 
 	dsConfig, ok := repoConfig["Datastore"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore' or invalid type in %s", filepath.Join(c.path, ConfigFile))
+		return fmt.Errorf("no 'Datastore' or invalid type in %s", filepath.Join(c.path, repo.ConfigFile))
 	}
 
 	dsSpec, ok := dsConfig["Spec"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(c.path, ConfigFile))
+		return fmt.Errorf("no 'Datastore.Spec' or invalid type in %s", filepath.Join(c.path, repo.ConfigFile))
 	}
 
 	_, err = config.Validate(dsSpec, false)

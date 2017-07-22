@@ -56,7 +56,7 @@ func (a *ActionLogger) Log(action Action, params ...string) error {
 	}
 
 	if n != len(d) {
-		return fmt.Errorf("failed to write log, wrote %d, expected %d", n, len(d))
+		return fmt.Errorf("failed to write steps, wrote %d, expected %d", n, len(d))
 	}
 
 	return a.file.Sync()

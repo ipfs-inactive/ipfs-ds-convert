@@ -9,7 +9,7 @@ ipfs-ds-convert
 
 > Datastore converter for go-ipfs
 
-This tool is WIP and may damage your data. Make sure to backup first.
+This tool is WIP and may damage your data. Make sure to make a backup first.
 
 TODO:
 - [x] Finish basic conversion code
@@ -19,12 +19,13 @@ TODO:
   - [ ] Coverage > 80% or more
 - [ ] Review
 - [ ] Standard readme
-- [ ] Revert on error
-  - As a subcommand
-- [ ] Optimize some standard cases
+- [x] Revert on error / from backup
+- [ ] Cleanup backup subcommand
+- [x] Optimize some standard cases
   - [x] Don't copy directories when not needed
   - [ ] Detect renames
-- [ ] Report progress
+    - Not that common
+- [x] Report progress
 
 ## Contribute
 

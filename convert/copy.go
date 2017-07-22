@@ -106,13 +106,13 @@ func (c *Copy) Verify() error {
 func (c *Copy) validateSpecs() error {
 	oldPaths, err := config.Validate(c.fromSpec, false)
 	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, SpecsFile))
+		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, repo.SpecsFile))
 	}
 	c.oldPaths = oldPaths
 
 	newPaths, err := config.Validate(c.toSpec, false)
 	if err != nil {
-		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, ConfigFile))
+		return errors.Wrapf(err, "error validating datastore spec in %s", filepath.Join(c.path, repo.ConfigFile))
 	}
 	c.newPaths = newPaths
 
@@ -165,7 +165,6 @@ func CopyKeys(fromDs repo.Datastore, toDs repo.Datastore) error {
 
 	var curBatch ds.Batch
 
-	fmt.Printf("\n")
 	for {
 		entry, ok := res.NextSync()
 		if entry.Error != nil {
@@ -212,6 +211,7 @@ func CopyKeys(fromDs repo.Datastore, toDs repo.Datastore) error {
 		}
 	}
 
+	fmt.Printf("\rcopied %d keys", doneEntries + curEntries)
 	fmt.Printf("\n")
 
 	if curEntries > 0 {
