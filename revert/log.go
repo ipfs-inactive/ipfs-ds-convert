@@ -17,6 +17,9 @@ const (
 
 	//For breaking things that can't be easily recovered from, say writing new spec
 	ActionManual = Action("manual")
+
+	//ActionManual marks backup files that can be cleaned up after conversion with --keep
+	ActionCleanup = Action("cleanup")
 )
 
 type Action string

@@ -141,6 +141,11 @@ func (c *Conversion) saveNewSpec(backup bool) (err error) {
 			return err
 		}
 
+		err = c.log.Log(revert.ActionCleanup, backupFile.Name())
+		if err != nil {
+			return err
+		}
+
 		err = backupFile.Close()
 		if err != nil {
 			return err

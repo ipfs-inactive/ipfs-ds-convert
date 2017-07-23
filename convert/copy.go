@@ -238,6 +238,11 @@ func (c *Copy) swapDatastores() (err error) {
 		return err
 	}
 
+	err = c.log.Log(revert.ActionCleanup, c.oldDsDir)
+	if err != nil {
+		return err
+	}
+
 	c.logStep("create temp datastore directory at %s", c.oldDsDir)
 
 	//TODO: Check if old dirs aren't mount points

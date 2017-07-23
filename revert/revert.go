@@ -21,9 +21,8 @@ type process struct {
 	steps Steps
 }
 
-func Revert(repoPath string, force bool) (err error) {
+func Revert(repoPath string, force bool, cleanupMode bool) (err error) {
 	//TODO: validate repo dir
-	//TODO: cleanup mode after convert --keep
 	//TODO: option to inject new spec to config
 
 	p := process{
@@ -42,15 +41,25 @@ func Revert(repoPath string, force bool) (err error) {
 		return err
 	}
 
-	Log.Println("Start revert")
+	if cleanupMode {
+		Log.Println("Start cleanup")
+	} else {
+		Log.Println("Start revert")
+	}
 
+	n := 0
 	for {
 		step := p.steps.top()
 		if step.action == "" {
 			break
 		}
 
-		err := p.executeStep(step)
+		if !cleanupMode {
+			err = p.executeStep(step)
+		} else {
+			err = p.executeCleanupStep(step, n)
+		}
+
 		if err != nil {
 			return err
 		}
@@ -59,6 +68,8 @@ func Revert(repoPath string, force bool) (err error) {
 		if err != nil {
 			return err
 		}
+
+		n++
 	}
 
 	p.steps.write(p.repo)
@@ -125,8 +136,40 @@ func (p *process) executeStep(step Step) error {
 
 		Log.Println("\\-> ok")
 
+	case ActionCleanup:
 	default:
 		return fmt.Errorf("unknown revert step '%s'", step.action)
+	}
+
+	return nil
+}
+
+func (p *process) executeCleanupStep(step Step, n int) error {
+	if n == 0 && step.action != ActionDone {
+		return fmt.Errorf("cannot cleanup after failed conversion")
+	}
+
+	switch step.action {
+	case ActionDone:
+	case ActionRemove:
+	case ActionMove:
+	case ActionMkdir:
+
+	case ActionCleanup:
+		if len(step.arg) != 1 {
+			return fmt.Errorf("cleanup arg count %d != 1", len(step.arg))
+		}
+		Log.Printf("cleanup '%s'", step.arg[0])
+
+		err := os.RemoveAll(step.arg[0])
+		if err != nil {
+			return err //TODO: wrap with more context?
+		}
+
+		Log.Println("\\-> ok")
+
+	default:
+		return fmt.Errorf("unknown cleanup step '%s'", step.action)
 	}
 
 	return nil

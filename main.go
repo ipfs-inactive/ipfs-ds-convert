@@ -5,9 +5,9 @@ import (
 	"path"
 
 	"github.com/ipfs/ipfs-ds-convert/convert"
+	"github.com/ipfs/ipfs-ds-convert/revert"
 	homedir "github.com/mitchellh/go-homedir"
 	cli "gx/ipfs/QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K/cli"
-	"github.com/ipfs/ipfs-ds-convert/revert"
 )
 
 const (
@@ -34,6 +34,7 @@ func main() {
 	app.Commands = []cli.Command{
 		ConvertCommand,
 		RevertCommand,
+		CleanupCommand,
 	}
 	if err := app.Run(os.Args); err != nil {
 		convert.Log.Fatal(err)
@@ -43,7 +44,7 @@ func main() {
 
 var ConvertCommand = cli.Command{
 	Name:  "convert",
-	Usage: "convert datastore setup",
+	Usage: "convert datastore ",
 	Description: `'convert' converts existing ipfs datastore setup to another based on the
 ipfs configuration and repo specs.
 
@@ -105,7 +106,30 @@ IPFS_PATH environmental variable is respected
 			convert.Log.Fatal(err)
 		}
 
-		err = revert.Revert(baseDir, c.Bool("force"))
+		err = revert.Revert(baseDir, c.Bool("force"), false)
+		if err != nil {
+			convert.Log.Fatal(err)
+		}
+		return err
+	},
+}
+
+var CleanupCommand = cli.Command{
+	Name:  "cleanup",
+	Usage: "remove leftover backup files",
+	Description: `'cleanup' removes backup files left after successful convert --keep
+was run.
+
+IPFS_PATH environmental variable is respected
+	`,
+	Flags: []cli.Flag{},
+	Action: func(c *cli.Context) error {
+		baseDir, err := getBaseDir()
+		if err != nil {
+			convert.Log.Fatal(err)
+		}
+
+		err = revert.Revert(baseDir, c.Bool("force"), true)
 		if err != nil {
 			convert.Log.Fatal(err)
 		}
@@ -114,7 +138,6 @@ IPFS_PATH environmental variable is respected
 }
 
 //TODO: Patch config util command
-//TODO: Cleanup command
 
 func getBaseDir() (string, error) {
 	baseDir := os.Getenv(EnvDir)
