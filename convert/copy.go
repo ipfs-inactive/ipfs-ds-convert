@@ -211,7 +211,7 @@ func CopyKeys(fromDs repo.Datastore, toDs repo.Datastore) error {
 		}
 	}
 
-	fmt.Printf("\rcopied %d keys", doneEntries + curEntries)
+	fmt.Printf("\rcopied %d keys", doneEntries+curEntries)
 	fmt.Printf("\n")
 
 	if curEntries > 0 {

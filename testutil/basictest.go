@@ -1,8 +1,8 @@
 package testutil
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func PrepareTest(t *testing.T, keys, blocks int) (string, func(t *testing.T), int64, int64) {
@@ -55,4 +55,3 @@ func FinishTest(t *testing.T, dir string, seed1, seed2 int64, keys, blocks int) 
 		t.Fatal(err)
 	}
 }
-

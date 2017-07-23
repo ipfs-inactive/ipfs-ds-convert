@@ -9,7 +9,11 @@ import (
 
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
+	"encoding/json"
+	"github.com/ipfs/ipfs-ds-convert/config"
+	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
+	"io/ioutil"
 )
 
 var Log = logging.New(os.Stderr, "revert ", logging.LstdFlags)
@@ -21,9 +25,8 @@ type process struct {
 	steps Steps
 }
 
-func Revert(repoPath string, force bool, cleanupMode bool) (err error) {
+func Revert(repoPath string, force bool, fixSpec bool, cleanupMode bool) (err error) {
 	//TODO: validate repo dir
-	//TODO: option to inject new spec to config
 
 	p := process{
 		repo:  repoPath,
@@ -73,6 +76,15 @@ func Revert(repoPath string, force bool, cleanupMode bool) (err error) {
 	}
 
 	p.steps.write(p.repo)
+
+	if fixSpec {
+		Log.Println("Save datastore_spec into config")
+
+		err := fixConfig(p.repo)
+		if err != nil {
+			return err
+		}
+	}
 
 	Log.Println("All tasks finished")
 	return nil
@@ -173,4 +185,52 @@ func (p *process) executeCleanupStep(step Step, n int) error {
 	}
 
 	return nil
+}
+
+func fixConfig(repoPath string) error {
+	spec := make(map[string]interface{})
+	err := config.Load(filepath.Join(repoPath, repo.SpecsFile), &spec)
+	if err != nil {
+		return err
+	}
+
+	_, err = config.Validate(spec, true)
+	if err != nil {
+		return errors.Wrapf(err, "validating datastore_spec spec")
+	}
+
+	repoConfig := make(map[string]interface{})
+	err = config.Load(filepath.Join(repoPath, repo.ConfigFile), &repoConfig)
+	if err != nil {
+		return err
+	}
+
+	confDatastore, ok := repoConfig["Datastore"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid Datastore field in config")
+	}
+
+	confDatastore["Spec"] = spec
+
+	err = os.Rename(filepath.Join(repoPath, repo.ConfigFile), filepath.Join(repoPath, "config-old"))
+	if err != nil {
+		return err
+	}
+
+	confBytes, err := json.MarshalIndent(repoConfig, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(filepath.Join(repoPath, repo.ConfigFile), []byte(confBytes), 0660)
+	if err != nil {
+		return err
+	}
+
+	//TODO: might try opening the datastore to soo if config works and revert to old
+	//config.
+
+	err = os.Remove(filepath.Join(repoPath, "config-old"))
+
+	return err
 }

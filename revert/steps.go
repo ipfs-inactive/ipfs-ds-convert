@@ -80,14 +80,14 @@ func (s *Steps) top() Step {
 	if len(*s) == 0 {
 		return Step{}
 	}
-	return (*s)[len(*s) - 1]
+	return (*s)[len(*s)-1]
 }
 
 func (s *Steps) pop(repo string) error {
 	if len(*s) == 0 {
 		return nil
 	}
-	*s = (*s)[:len(*s) - 1]
+	*s = (*s)[:len(*s)-1]
 
 	return s.write(repo)
 }
@@ -99,7 +99,7 @@ func (s *Steps) write(repo string) error {
 
 	f, err := os.Create(path.Join(repo, ConvertLog))
 	if err != nil {
-		return  err
+		return err
 	}
 	defer f.Close()
 

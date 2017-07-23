@@ -3,11 +3,13 @@ package convert_test
 import (
 	"fmt"
 	"path"
+	"strings"
 	"testing"
+
+	"github.com/ipfs/ipfs-ds-convert/config"
 
 	convert "github.com/ipfs/ipfs-ds-convert/convert"
 	testutil "github.com/ipfs/ipfs-ds-convert/testutil"
-	"strings"
 )
 
 func TestBasicConvert(t *testing.T) {
@@ -64,7 +66,7 @@ func TestNoopConvert(t *testing.T) {
 
 func TestSkipCopyConvert(t *testing.T) {
 	spec := make(map[string]interface{})
-	err := convert.LoadConfig("../testfiles/skipableSpec", &spec)
+	err := config.Load("../testfiles/skipableSpec", &spec)
 	if err != nil {
 		t.Fatal(err)
 	}

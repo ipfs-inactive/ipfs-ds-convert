@@ -7,7 +7,8 @@ import (
 	"os"
 	"testing"
 
-	convert "github.com/ipfs/ipfs-ds-convert/convert"
+	conf "github.com/ipfs/ipfs-ds-convert/config"
+
 	config "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo/config"
 	fsrepo "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo/fsrepo"
 )
@@ -46,13 +47,13 @@ func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *tes
 
 func PatchConfig(t *testing.T, configPath string, newSpecPath string) {
 	newSpec := make(map[string]interface{})
-	err := convert.LoadConfig(newSpecPath, &newSpec)
+	err := conf.Load(newSpecPath, &newSpec)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	repoConfig := make(map[string]interface{})
-	err = convert.LoadConfig(configPath, &repoConfig)
+	err = conf.Load(configPath, &repoConfig)
 	if err != nil {
 		t.Fatal(err)
 	}

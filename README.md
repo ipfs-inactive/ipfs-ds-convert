@@ -20,7 +20,7 @@ TODO:
 - [ ] Review
 - [ ] Standard readme
 - [x] Revert on error / from backup
-- [ ] Cleanup backup subcommand
+- [x] Cleanup backup subcommand
 - [x] Optimize some standard cases
   - [x] Don't copy directories when not needed
   - [ ] Detect renames

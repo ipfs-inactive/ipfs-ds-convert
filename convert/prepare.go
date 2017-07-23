@@ -37,12 +37,13 @@ func (c *Conversion) loadSpecs() error {
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
+
 	if specStat.Mode()&0200 == 0 {
 		return errors.New("datastore_spec is not writable")
 	}
 
 	oldSpec := make(map[string]interface{})
-	err = LoadConfig(filepath.Join(c.path, repo.SpecsFile), &oldSpec)
+	err = config.Load(filepath.Join(c.path, repo.SpecsFile), &oldSpec)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (c *Conversion) loadSpecs() error {
 	c.fromSpec = oldSpec
 
 	repoConfig := make(map[string]interface{})
-	err = LoadConfig(filepath.Join(c.path, repo.ConfigFile), &repoConfig)
+	err = config.Load(filepath.Join(c.path, repo.ConfigFile), &repoConfig)
 	if err != nil {
 		return err
 	}

@@ -99,6 +99,10 @@ IPFS_PATH environmental variable is respected
 			Name:  "force",
 			Usage: "revert even if last conversion was successful",
 		},
+		cli.BoolFlag{
+			Name:  "fix-config",
+			Usage: "revert repo config from datastore_spec",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		baseDir, err := getBaseDir()
@@ -106,7 +110,7 @@ IPFS_PATH environmental variable is respected
 			convert.Log.Fatal(err)
 		}
 
-		err = revert.Revert(baseDir, c.Bool("force"), false)
+		err = revert.Revert(baseDir, c.Bool("force"), c.Bool("fix-config"), false)
 		if err != nil {
 			convert.Log.Fatal(err)
 		}
@@ -129,7 +133,7 @@ IPFS_PATH environmental variable is respected
 			convert.Log.Fatal(err)
 		}
 
-		err = revert.Revert(baseDir, c.Bool("force"), true)
+		err = revert.Revert(baseDir, c.Bool("force"), false, true)
 		if err != nil {
 			convert.Log.Fatal(err)
 		}
