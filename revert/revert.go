@@ -5,10 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
+	logging "log"
+
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 )
+
+var Log = logging.New(os.Stderr, "revert ", logging.LstdFlags)
 
 type process struct {
 	repo  string
@@ -19,7 +23,6 @@ type process struct {
 
 func Revert(repoPath string, force bool) (err error) {
 	//TODO: validate repo dir
-	//TODO: use logger
 	//TODO: cleanup mode after convert --keep
 	//TODO: option to inject new spec to config
 
@@ -39,7 +42,7 @@ func Revert(repoPath string, force bool) (err error) {
 		return err
 	}
 
-	fmt.Println("Start revert")
+	Log.Println("Start revert")
 
 	for {
 		step := p.steps.top()
@@ -60,7 +63,7 @@ func Revert(repoPath string, force bool) (err error) {
 
 	p.steps.write(p.repo)
 
-	fmt.Println("All tasks finished")
+	Log.Println("All tasks finished")
 	return nil
 }
 
@@ -75,20 +78,20 @@ func (p *process) executeStep(step Step) error {
 		if len(step.arg) != 1 {
 			return fmt.Errorf("revert remove arg count %d != 1", len(step.arg))
 		}
-		fmt.Printf("> remove '%s': ", step.arg[0])
+		Log.Printf("remove '%s'", step.arg[0])
 
 		err := os.RemoveAll(step.arg[0])
 		if err != nil {
 			return err //TODO: wrap with more context?
 		}
 
-		fmt.Println("ok")
+		Log.Println("\\-> ok")
 
 	case ActionMove:
 		if len(step.arg) != 2 {
 			return fmt.Errorf("revert move arg count %d != 2", len(step.arg))
 		}
-		fmt.Printf("> move '%s' -> '%s': ", step.arg[0], step.arg[1])
+		Log.Printf("move '%s' -> '%s': ", step.arg[0], step.arg[1])
 
 		if _, err := os.Stat(step.arg[0]); os.IsNotExist(err) {
 			return fmt.Errorf("revert move source file '%s' didn't exist", step.arg[0])
@@ -103,13 +106,13 @@ func (p *process) executeStep(step Step) error {
 			return err //TODO: wrap with more context?
 		}
 
-		fmt.Println("ok")
+		Log.Println("\\-> ok")
 
 	case ActionMkdir:
 		if len(step.arg) != 1 {
 			return fmt.Errorf("revert mkdir arg count %d != 1", len(step.arg))
 		}
-		fmt.Printf("> mkdir '%s': ", step.arg[0])
+		Log.Printf("mkdir '%s': ", step.arg[0])
 
 		if _, err := os.Stat(step.arg[0]); !os.IsNotExist(err) {
 			return fmt.Errorf("revert mkdir destination '%s' did exist", step.arg[0])
@@ -120,7 +123,7 @@ func (p *process) executeStep(step Step) error {
 			return err //TODO: wrap with more context?
 		}
 
-		fmt.Println("ok")
+		Log.Println("\\-> ok")
 
 	default:
 		return fmt.Errorf("unknown revert step '%s'", step.action)

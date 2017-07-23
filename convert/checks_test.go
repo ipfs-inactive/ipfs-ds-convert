@@ -18,7 +18,7 @@ import (
 
 func TestInvalidRepoVersion(t *testing.T) {
 	//Prepare repo
-	dir, _close, _, _ := prepareTest(t, 10, 10)
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
 	err := ioutil.WriteFile(path.Join(dir, "version"), []byte("147258369"), 0664)
@@ -39,7 +39,7 @@ func TestInvalidRepoVersion(t *testing.T) {
 
 func TestLockedRepo(t *testing.T) {
 	//Prepare repo
-	dir, _close, _, _ := prepareTest(t, 10, 10)
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
 	unlock, err := lock.Lock(filepath.Join(dir, "repo.lock"))
@@ -61,7 +61,7 @@ func TestLockedRepo(t *testing.T) {
 
 func TestInvalidSpec(t *testing.T) {
 	//Prepare repo
-	dir, _close, _, _ := prepareTest(t, 10, 10)
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/invalidSpec")
@@ -79,7 +79,7 @@ func TestInvalidSpec(t *testing.T) {
 
 func TestAbsolutePathSpec(t *testing.T) {
 	//Prepare repo
-	dir, _close, _, _ := prepareTest(t, 10, 10)
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/absPathSpec")
@@ -97,7 +97,7 @@ func TestAbsolutePathSpec(t *testing.T) {
 
 func TestReusePathSpec(t *testing.T) {
 	//Prepare repo
-	dir, _close, _, _ := prepareTest(t, 10, 10)
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/reusePathSpec")
@@ -115,7 +115,7 @@ func TestReusePathSpec(t *testing.T) {
 
 func TestROSpec(t *testing.T) {
 	//Prepare repo
-	dir, _close, _, _ := prepareTest(t, 10, 10)
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
 	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/badgerSpec")
