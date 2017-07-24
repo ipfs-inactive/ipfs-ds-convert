@@ -48,6 +48,10 @@ func NewActionLogger(repoPath string) (*ActionLogger, error) {
 }
 
 func (a *ActionLogger) Log(action Action, params ...string) error {
+	if a == nil {
+		return nil
+	}
+
 	d, err := action.Line(params...)
 	if err != nil {
 		return err

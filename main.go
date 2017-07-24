@@ -5,8 +5,10 @@ import (
 	"path"
 
 	"github.com/ipfs/ipfs-ds-convert/convert"
+	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/revert"
 	homedir "github.com/mitchellh/go-homedir"
+
 	cli "gx/ipfs/QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K/cli"
 )
 
@@ -18,7 +20,13 @@ const (
 )
 
 func main() {
+	run(os.Args)
+}
+
+func run(args []string) {
 	app := cli.NewApp()
+
+	app.Version = repo.ToolVersion
 
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
@@ -36,10 +44,10 @@ func main() {
 		RevertCommand,
 		CleanupCommand,
 	}
-	if err := app.Run(os.Args); err != nil {
+
+	if err := app.Run(args); err != nil {
 		convert.Log.Fatal(err)
 	}
-
 }
 
 var ConvertCommand = cli.Command{

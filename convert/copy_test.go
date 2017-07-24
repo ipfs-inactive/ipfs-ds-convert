@@ -1,8 +1,14 @@
 package convert
 
 import (
+	"path"
 	"strings"
 	"testing"
+
+	"github.com/ipfs/ipfs-ds-convert/repo"
+	"github.com/ipfs/ipfs-ds-convert/testutil"
+
+	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 )
 
 var (
@@ -14,6 +20,37 @@ var (
 	}
 
 	InvalidSpec = map[string]interface{}{}
+
+	DefaultSpec = map[string]interface{}{
+		"type": "mount",
+		"mounts": []interface{}{
+			map[string]interface{}{
+				"mountpoint": "/blocks",
+				"type":       "flatfs",
+				"path":       "blocks",
+				"sync":       true,
+				"shardFunc":  "/repo/flatfs/shard/v1/next-to-last/2",
+			},
+			map[string]interface{}{
+				"mountpoint":  "/",
+				"type":        "levelds",
+				"path":        "levelDatastore",
+				"compression": "none",
+			},
+		},
+	}
+
+	SingleSpec = map[string]interface{}{
+		"type": "mount",
+		"mounts": []interface{}{
+			map[string]interface{}{
+				"mountpoint":  "/",
+				"type":        "levelds",
+				"path":        "levelDatastore",
+				"compression": "none",
+			},
+		},
+	}
 )
 
 func TestInvalidSpecLeft(t *testing.T) {
@@ -53,4 +90,37 @@ func TestOpenNonexist(t *testing.T) {
 	}
 
 	t.Errorf("expected error")
+}
+
+func TestVerifyKeysFail(t *testing.T) {
+	dir, _close, _, _ := testutil.PrepareTest(t, 100, 100)
+	defer _close(t)
+
+	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/singleSpec")
+
+	c := NewCopy(dir, DefaultSpec, SingleSpec, nil, func(string, ...interface{}) {})
+	err := c.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := repo.OpenDatastore(dir, SingleSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = r.Delete(ds.NewKey("/blocks/NotARandomKey"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = r.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c.Verify()
+	if err.Error() != "Key /blocks/NotARandomKey was not present in new datastore" {
+		t.Fatal(err)
+	}
 }

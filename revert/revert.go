@@ -99,7 +99,7 @@ func (p *process) executeStep(step Step) error {
 
 	case ActionRemove:
 		if len(step.arg) != 1 {
-			return fmt.Errorf("revert remove arg count %d != 1", len(step.arg))
+			return fmt.Errorf("revert remove: arg count %d != 1", len(step.arg))
 		}
 		Log.Printf("remove '%s'", step.arg[0])
 
@@ -112,16 +112,16 @@ func (p *process) executeStep(step Step) error {
 
 	case ActionMove:
 		if len(step.arg) != 2 {
-			return fmt.Errorf("revert move arg count %d != 2", len(step.arg))
+			return fmt.Errorf("revert move: arg count %d != 2", len(step.arg))
 		}
 		Log.Printf("move '%s' -> '%s': ", step.arg[0], step.arg[1])
 
 		if _, err := os.Stat(step.arg[0]); os.IsNotExist(err) {
-			return fmt.Errorf("revert move source file '%s' didn't exist", step.arg[0])
+			return fmt.Errorf("revert move: source file '%s' didn't exist", step.arg[0])
 		}
 
 		if _, err := os.Stat(step.arg[1]); !os.IsNotExist(err) {
-			return fmt.Errorf("revert move destination file '%s' did exist", step.arg[1])
+			return fmt.Errorf("revert move: destination file '%s' did exist", step.arg[1])
 		}
 
 		err := os.Rename(step.arg[0], step.arg[1])
@@ -133,12 +133,12 @@ func (p *process) executeStep(step Step) error {
 
 	case ActionMkdir:
 		if len(step.arg) != 1 {
-			return fmt.Errorf("revert mkdir arg count %d != 1", len(step.arg))
+			return fmt.Errorf("revert mkdir: arg count %d != 1", len(step.arg))
 		}
 		Log.Printf("mkdir '%s': ", step.arg[0])
 
 		if _, err := os.Stat(step.arg[0]); !os.IsNotExist(err) {
-			return fmt.Errorf("revert mkdir destination '%s' did exist", step.arg[0])
+			return fmt.Errorf("revert mkdir: destination '%s' did exist", step.arg[0])
 		}
 
 		err := os.MkdirAll(step.arg[0], 0755)

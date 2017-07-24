@@ -11,6 +11,7 @@ import (
 
 	"github.com/ipfs/ipfs-ds-convert/convert"
 	"github.com/ipfs/ipfs-ds-convert/repo"
+	"github.com/ipfs/ipfs-ds-convert/revert"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
@@ -55,6 +56,193 @@ func TestLockedRepo(t *testing.T) {
 	}
 
 	if !strings.Contains(err.Error(), "already locked") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestNoSpec(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := os.Remove(path.Join(dir, repo.SpecsFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected no such file or directory"))
+	}
+
+	if !strings.Contains(err.Error(), "/datastore_spec: no such file or directory") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestNoVersion(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := os.Remove(path.Join(dir, "version"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected no such file or directory"))
+	}
+
+	if !strings.Contains(err.Error(), "/version: no such file or directory") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestInvalidVersion(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := ioutil.WriteFile(path.Join(dir, "version"), []byte("a"), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected strconv.Atoi: parsing"))
+	}
+
+	if !strings.Contains(err.Error(), `strconv.Atoi: parsing "a": invalid syntax`) {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestInvalidSpecJson(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := ioutil.WriteFile(path.Join(dir, repo.SpecsFile), []byte("}"), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected invalid character '}' looking for beginning of value"))
+	}
+
+	if !strings.Contains(err.Error(), "invalid character '}' looking for beginning of value") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestInvalidSpecFile(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := ioutil.WriteFile(path.Join(dir, repo.SpecsFile), []byte("{}"), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected validating datastore_spec spec: invalid type entry in config"))
+	}
+
+	if !strings.Contains(err.Error(), "validating datastore_spec spec: invalid type entry in config") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestNoConfig(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := os.Remove(path.Join(dir, repo.ConfigFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected no such file or directory"))
+	}
+
+	if !strings.Contains(err.Error(), "/config: no such file or directory") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestInvalidConfigJson(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := ioutil.WriteFile(path.Join(dir, repo.ConfigFile), []byte("}"), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected invalid character '}' looking for beginning of value"))
+	}
+
+	if !strings.Contains(err.Error(), "invalid character '}' looking for beginning of value") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+}
+
+func TestInvalidConfigFile(t *testing.T) {
+	//Prepare repo
+	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
+	defer _close(t)
+
+	err := ioutil.WriteFile(path.Join(dir, repo.ConfigFile), []byte("{}"), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected no 'Datastore' or invalid type in"))
+	}
+
+	if !strings.Contains(err.Error(), "no 'Datastore' or invalid type") {
+		t.Fatal(fmt.Errorf("unexpected error: %s", err))
+	}
+
+	err = os.Remove(path.Join(dir, revert.ConvertLog))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = ioutil.WriteFile(path.Join(dir, repo.ConfigFile), []byte(`{"Datastore":{}}`), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Convert!
+	err = convert.Convert(dir, false)
+	if err == nil {
+		t.Fatal(fmt.Errorf("No error, expected no 'Datastore.Spec' or invalid type"))
+	}
+
+	if !strings.Contains(err.Error(), "no 'Datastore.Spec' or invalid type in") {
 		t.Fatal(fmt.Errorf("unexpected error: %s", err))
 	}
 }

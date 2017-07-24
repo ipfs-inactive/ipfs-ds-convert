@@ -34,7 +34,7 @@ func (c *Conversion) checkRepoVersion() error {
 
 func (c *Conversion) loadSpecs() error {
 	specStat, err := os.Stat(filepath.Join(c.path, repo.SpecsFile))
-	if err != nil && !os.IsNotExist(err) {
+	if os.IsNotExist(err) {
 		return err
 	}
 

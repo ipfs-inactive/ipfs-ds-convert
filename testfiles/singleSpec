@@ -1,0 +1,11 @@
+{
+  "mounts": [
+    {
+      "compression": "none",
+      "path": "datastore",
+      "type": "levelds",
+      "mountpoint": "/"
+    }
+  ],
+  "type": "mount"
+}

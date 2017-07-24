@@ -57,6 +57,11 @@ func InsertRandomKeys(prefix string, n int, r repo.Repo) (int64, error) {
 		}
 	}
 
+	err = batch.Put(ds.NewKey(fmt.Sprintf("/%s%s", prefix, "NotARandomKey")), []byte("data"))
+	if err != nil {
+		return 0, err
+	}
+
 	err = batch.Commit()
 	if err != nil {
 		return 0, err
