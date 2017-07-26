@@ -87,6 +87,8 @@ func Convert(repoPath string, keepBackup bool) error {
 			}
 		}
 	case "noop":
+	default:
+		panic(fmt.Sprintf("unexpected strategy %s", conversionType))
 	}
 
 	Log.Println("Saving new spec")
@@ -117,36 +119,7 @@ func Convert(repoPath string, keepBackup bool) error {
 func (c *Conversion) saveNewSpec(backup bool) (err error) {
 
 	if backup {
-		backupFile, err := ioutil.TempFile(c.path, "datastore_spec_backup")
-		if err != nil {
-			return err
-		}
-
-		specData, err := ioutil.ReadFile(filepath.Join(c.path, repo.SpecsFile))
-		if err != nil {
-			return err
-		}
-
-		n, err := backupFile.Write(specData)
-		if err != nil {
-			return err
-		}
-
-		if n != len(specData) {
-			return fmt.Errorf("failed to create backup of datastore_spec")
-		}
-
-		err = c.log.Log(revert.ActionMove, backupFile.Name(), filepath.Join(c.path, repo.SpecsFile))
-		if err != nil {
-			return err
-		}
-
-		err = c.log.Log(revert.ActionCleanup, backupFile.Name())
-		if err != nil {
-			return err
-		}
-
-		err = backupFile.Close()
+		err = c.backupSpec()
 		if err != nil {
 			return err
 		}
@@ -172,6 +145,44 @@ func (c *Conversion) saveNewSpec(backup bool) (err error) {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (c *Conversion) backupSpec() error {
+	backupFile, err := ioutil.TempFile(c.path, "datastore_spec_backup")
+	if err != nil {
+		return err
+	}
+
+	specData, err := ioutil.ReadFile(filepath.Join(c.path, repo.SpecsFile))
+	if err != nil {
+		return err
+	}
+
+	n, err := backupFile.Write(specData)
+	if err != nil {
+		return err
+	}
+
+	if n != len(specData) {
+		return fmt.Errorf("failed to create backup of datastore_spec")
+	}
+
+	err = c.log.Log(revert.ActionMove, backupFile.Name(), filepath.Join(c.path, repo.SpecsFile))
+	if err != nil {
+		return err
+	}
+
+	err = c.log.Log(revert.ActionCleanup, backupFile.Name())
+	if err != nil {
+		return err
+	}
+
+	err = backupFile.Close()
+	if err != nil {
+		return err
 	}
 
 	return nil
