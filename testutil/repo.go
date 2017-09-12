@@ -9,8 +9,8 @@ import (
 
 	conf "github.com/ipfs/ipfs-ds-convert/config"
 
-	config "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo/config"
-	fsrepo "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo/fsrepo"
+	config "gx/ipfs/QmeZDnewc4mTVqSwMrbCJMA9sQuCeaoxoEH7uNRtY9geyc/go-ipfs/repo/config"
+	fsrepo "gx/ipfs/QmeZDnewc4mTVqSwMrbCJMA9sQuCeaoxoEH7uNRtY9geyc/go-ipfs/repo/fsrepo"
 )
 
 func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {

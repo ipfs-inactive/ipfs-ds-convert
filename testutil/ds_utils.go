@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"math/rand"
 
-	repo "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo"
-	fsrepo "gx/ipfs/QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8/go-ipfs/repo/fsrepo"
+	repo "gx/ipfs/QmeZDnewc4mTVqSwMrbCJMA9sQuCeaoxoEH7uNRtY9geyc/go-ipfs/repo"
+	fsrepo "gx/ipfs/QmeZDnewc4mTVqSwMrbCJMA9sQuCeaoxoEH7uNRtY9geyc/go-ipfs/repo/fsrepo"
 
 	"bytes"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
