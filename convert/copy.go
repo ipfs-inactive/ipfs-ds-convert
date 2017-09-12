@@ -186,7 +186,7 @@ func CopyKeys(fromDs repo.Datastore, toDs repo.Datastore) error {
 
 		val, err := fromDs.Get(ds.RawKey(entry.Key))
 		if err != nil {
-			return errors.New("get from old datastore failed")
+			return errors.Wrapf(err, "get from old datastore failed")
 		}
 
 		curBatch.Put(ds.RawKey(entry.Key), val)
