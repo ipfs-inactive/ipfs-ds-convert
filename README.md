@@ -26,6 +26,7 @@ TODO:
   - [ ] Detect renames
     - Not that common
 - [x] Report progress
+- [ ] Don't depend on go-ipfs
 
 ## Contribute
 

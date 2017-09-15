@@ -33,9 +33,9 @@
     },
     {
       "author": "magik6k",
-      "hash": "QmTC7BY2viSAbPbGte6NyMZJCC2xheaRBYKEn4BuzTxe7W",
+      "hash": "QmUPQpMxu9BFE2MhmBkiMUBn4VTSuAAZZkX9LT699tQeiw",
       "name": "go-ds-badger",
-      "version": "0.1.10"
+      "version": "0.3.1"
     },
     {
       "author": "whyrusleeping",
@@ -56,7 +56,7 @@
       "version": "1.1.4"
     },
     {
-      "hash": "QmV4cdHmCmWwqfjPnS55C3hArsXSyYyQeY8F6tsyL6J1L8",
+      "hash": "QmaZiW9UbccSq3zp1nhYorSpYBUjsPG8tyfTE1nxBFkNEx",
       "name": "go-ipfs",
       "version": "0.4.11-dev"
     }
