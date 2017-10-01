@@ -67,12 +67,6 @@ $ ipfs-ds-convert convert
 
 This can take a very long time to complete depending on the size of the datastore. If running this on a headless server it's recommended to use something like `screen` or `tmux` to run this command in a persistent shell.
 
-After the conversion has completed *succesfully*, remove the leftover backup files using
-
-```
-$ ipfs-ds-convert cleanup
-```
-
 ## Contribute
 
 PRs are welcome!
