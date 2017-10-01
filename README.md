@@ -28,6 +28,45 @@ TODO:
 - [x] Report progress
 - [ ] Don't depend on go-ipfs
 
+## Install
+
+### Build From Source
+
+These instructions assume that go has been installed as described [here](https://github.com/ipfs/go-ipfs#install-go).
+
+```
+$ go get -u github.com/ipfs/ipfs-ds-convert
+$ cd $GOPATH/src/github.com/ipfs/ipfs-ds-convert/
+$ make
+$ go install
+```
+
+## Usage
+
+### Convert to Badger Datastore
+
+Manually update Datastore Spec section of the IPFS config file to use the following spec.
+
+```
+"Spec": {
+      "child": {
+        "path": "badgerds",
+        "syncWrites": true,
+        "type": "badgerds"
+      },
+      "prefix": "badger.datastore",
+      "type": "measure"
+    }
+```
+
+Then, start the conversion using
+
+```
+$ ipfs-ds-convert convert
+```
+
+This can take a very long time to complete depending on the size of the datastore. If running this on a headless server it's recommended to use something like `screen` or `tmux` to run this command in a persistent shell.
+
 ## Contribute
 
 PRs are welcome!
