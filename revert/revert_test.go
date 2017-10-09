@@ -1,18 +1,18 @@
 package revert_test
 
 import (
+	"io/ioutil"
 	"path"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/ipfs/ipfs-ds-convert/convert"
+	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/revert"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
 	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
-	"io/ioutil"
-	"strings"
-	"github.com/ipfs/ipfs-ds-convert/repo"
 )
 
 func TestBasicConvertRevert(t *testing.T) {

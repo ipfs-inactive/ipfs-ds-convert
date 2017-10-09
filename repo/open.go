@@ -19,7 +19,7 @@ import (
 
 	retry "gx/ipfs/QmPP91WFAb8LCs8EMzGvDPPvg1kacbqRkoxgTTnUsZckGe/retry-datastore"
 	levelds "gx/ipfs/QmPdvXuXWAR6gtxxqZw42RtSADMwz4ijVmYHGS542b6cMz/go-ds-leveldb"
-	badgerds "gx/ipfs/QmUPQpMxu9BFE2MhmBkiMUBn4VTSuAAZZkX9LT699tQeiw/go-ds-badger"
+	badgerds "gx/ipfs/QmUamAGkvPp1w84dfc2YMy9ic6iyBvaRoaTiaat8Crtawq/go-ds-badger"
 	ldbopts "gx/ipfs/QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g/goleveldb/leveldb/opt"
 )
 

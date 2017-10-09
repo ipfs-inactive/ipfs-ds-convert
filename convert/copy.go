@@ -208,6 +208,7 @@ func CopyKeys(fromDs repo.Datastore, toDs repo.Datastore) error {
 
 			curEntries = 0
 			curSize = 0
+			curBatch = nil
 		}
 	}
 
