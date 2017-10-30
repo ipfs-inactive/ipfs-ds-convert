@@ -21,6 +21,9 @@ publish:
 test: deps
 	go test ./... -v
 
+install: all
+	go install
+
 circle: deps
 	go vet
 	$(eval PKGS := $(shell go list ./...))
