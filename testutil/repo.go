@@ -9,9 +9,16 @@ import (
 
 	conf "github.com/ipfs/ipfs-ds-convert/config"
 
-	config "gx/ipfs/QmY8QzCWeS2FLcDLD4D9adgmgKYwWwEkTZEjerysRBLqBe/go-ipfs/repo/config"
-	fsrepo "gx/ipfs/QmY8QzCWeS2FLcDLD4D9adgmgKYwWwEkTZEjerysRBLqBe/go-ipfs/repo/fsrepo"
+	config "gx/ipfs/QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo/go-ipfs/repo/config"
+	fsrepo "gx/ipfs/QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo/go-ipfs/repo/fsrepo"
+	madns "gx/ipfs/QmS7xUmsTdVNU2t1bPV6o9aXuXfufAjNGYgh2bcN2z9DAs/go-multiaddr-dns"
+	maddr "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
 )
+
+//Hack
+func init() {
+	maddr.Protocols = append(maddr.Protocols, madns.DnsaddrProtocol)
+}
 
 func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {
 	conf, err := config.Init(os.Stdout, 1024)

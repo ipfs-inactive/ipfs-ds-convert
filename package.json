@@ -56,9 +56,15 @@
       "version": "1.1.4"
     },
     {
-      "hash": "QmY8QzCWeS2FLcDLD4D9adgmgKYwWwEkTZEjerysRBLqBe",
+      "hash": "QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo",
       "name": "go-ipfs",
-      "version": "0.4.12-dev"
+      "version": "0.4.12-rc1"
+    },
+    {
+      "author": "lgierth",
+      "hash": "QmS7xUmsTdVNU2t1bPV6o9aXuXfufAjNGYgh2bcN2z9DAs",
+      "name": "go-multiaddr-dns",
+      "version": "0.2.0"
     }
   ],
   "gxVersion": "0.10.0",
