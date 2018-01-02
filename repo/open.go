@@ -17,10 +17,10 @@ import (
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	mount "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/syncmount"
 
-	badgerds "gx/ipfs/QmNyEjsu9TxPRC1PqaL3JQRwAsSAGA1mu6ZtuHonvh5rju/go-ds-badger"
 	retry "gx/ipfs/QmPP91WFAb8LCs8EMzGvDPPvg1kacbqRkoxgTTnUsZckGe/retry-datastore"
 	levelds "gx/ipfs/QmPdvXuXWAR6gtxxqZw42RtSADMwz4ijVmYHGS542b6cMz/go-ds-leveldb"
 	ldbopts "gx/ipfs/QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g/goleveldb/leveldb/opt"
+	badgerds "gx/ipfs/Qmdin8YL17fL1BC5ej6o9b8es6MBoiQjKVdyxEwJh3HVmf/go-ds-badger"
 )
 
 //TODO: extract and use fsrepo from go-ipfs
