@@ -9,10 +9,10 @@ import (
 
 	conf "github.com/ipfs/ipfs-ds-convert/config"
 
-	config "gx/ipfs/QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo/go-ipfs/repo/config"
-	fsrepo "gx/ipfs/QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo/go-ipfs/repo/fsrepo"
-	madns "gx/ipfs/QmS7xUmsTdVNU2t1bPV6o9aXuXfufAjNGYgh2bcN2z9DAs/go-multiaddr-dns"
-	maddr "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
+	madns "gx/ipfs/QmVHpaAVserMwuVXRJ7otLMro1D8qZQ5STSFfeK5eXTGy4/go-multiaddr-dns"
+	maddr "gx/ipfs/QmW8s4zTsUoX1Q6CeYxVKPyqSKbF7H1YDUyTostBtZ8DaG/go-multiaddr"
+	config "gx/ipfs/QmdY9E5hA3pzMDW7w7gKEoioeDyvno3KnVwcvv3X3zEVVA/go-ipfs/repo/config"
+	fsrepo "gx/ipfs/QmdY9E5hA3pzMDW7w7gKEoioeDyvno3KnVwcvv3X3zEVVA/go-ipfs/repo/fsrepo"
 )
 
 //Hack
@@ -26,7 +26,7 @@ func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *tes
 		t.Fatal(err)
 	}
 
-	err = config.ConfigProfiles["test"](conf)
+	err = config.Profiles["test"](conf)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *tes
 		conf.Datastore.Spec = spec
 	}
 
-	repoRoot, err := ioutil.TempDir("/tmp", "ds-convert-test-")
+	repoRoot, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatal(err)
 	}

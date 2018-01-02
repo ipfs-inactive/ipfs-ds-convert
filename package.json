@@ -9,27 +9,27 @@
   "gxDependencies": [
     {
       "author": "jbenet",
-      "hash": "QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG",
+      "hash": "QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5",
       "name": "go-datastore",
-      "version": "1.2.2"
+      "version": "1.4.0"
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmUTshC2PP4ZDqkrFfDU4JGJFMWjYnunxPgkQ6ZCA2hGqh",
+      "hash": "Qmak5iFUErGmKhYUC5StZtCGFp5bdhvye8PdKgTMk9B9Fw",
       "name": "go-ds-flatfs",
-      "version": "1.1.4"
+      "version": "1.1.5"
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmSb95iHExSSb47zpmyn5CyY5PZidVWSjyKyDqgYQrnKor",
+      "hash": "QmU7tt6mHJ5Wocjy2omBxpDfN8g9pkRimzJae7EXdrs96k",
       "name": "go-ds-measure",
-      "version": "1.2.2"
+      "version": "1.2.3"
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmPdvXuXWAR6gtxxqZw42RtSADMwz4ijVmYHGS542b6cMz",
+      "hash": "QmYnCBXxoyoS38vtNQjjpRwZTiUnpuuKpapxMNaDfyQRLf",
       "name": "go-ds-leveldb",
-      "version": "1.0.3"
+      "version": "1.0.4"
     },
     {
       "author": "magik6k",
@@ -51,20 +51,26 @@
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmPP91WFAb8LCs8EMzGvDPPvg1kacbqRkoxgTTnUsZckGe",
+      "hash": "QmTLGdJpFxjNTGqBkwTyhN3WeJteSjQPACmyxDjJ49V5NM",
       "name": "retry-datastore",
-      "version": "1.1.4"
+      "version": "1.1.5"
     },
     {
-      "hash": "QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo",
+      "hash": "QmdY9E5hA3pzMDW7w7gKEoioeDyvno3KnVwcvv3X3zEVVA",
       "name": "go-ipfs",
-      "version": "0.4.12-rc1"
+      "version": "0.4.14-dev"
     },
     {
       "author": "lgierth",
       "hash": "QmS7xUmsTdVNU2t1bPV6o9aXuXfufAjNGYgh2bcN2z9DAs",
       "name": "go-multiaddr-dns",
       "version": "0.2.0"
+    },
+    {
+      "author": "multiformats",
+      "hash": "QmW8s4zTsUoX1Q6CeYxVKPyqSKbF7H1YDUyTostBtZ8DaG",
+      "name": "go-multiaddr",
+      "version": "1.2.5"
     }
   ],
   "gxVersion": "0.10.0",

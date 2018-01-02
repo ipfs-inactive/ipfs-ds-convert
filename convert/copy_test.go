@@ -4,11 +4,14 @@ import (
 	"path"
 	"strings"
 	"testing"
+	"os"
+	"fmt"
+	"io/ioutil"
 
 	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
+	ds "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore"
 )
 
 var (
@@ -54,10 +57,15 @@ var (
 )
 
 func TestInvalidSpecLeft(t *testing.T) {
-	c := NewCopy("/tmp/", InvalidSpec, ValidSpec, nil, func(string, ...interface{}) {})
-	err := c.Run()
+	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
 	if err != nil {
-		if strings.Contains(err.Error(), "error validating datastore spec in /tmp/datastore_spec: invalid type entry in config") {
+		t.Fatalf(err.Error())
+	}
+
+	c := NewCopy(d, InvalidSpec, ValidSpec, nil, func(string, ...interface{}) {})
+	err = c.Run()
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf("error validating datastore spec in %s: invalid type entry in config", path.Join(d, "datastore_spec"))) {
 			return
 		}
 		t.Errorf("unexpected error: %s", err)
@@ -67,10 +75,15 @@ func TestInvalidSpecLeft(t *testing.T) {
 }
 
 func TestInvalidSpecRight(t *testing.T) {
-	c := NewCopy("/tmp/", ValidSpec, InvalidSpec, nil, func(string, ...interface{}) {})
-	err := c.Run()
+	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
 	if err != nil {
-		if strings.Contains(err.Error(), "error validating datastore spec in /tmp/config: invalid type entry in config") {
+		t.Fatalf(err.Error())
+	}
+
+	c := NewCopy(d, ValidSpec, InvalidSpec, nil, func(string, ...interface{}) {})
+	err = c.Run()
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf("error validating datastore spec in %s: invalid type entry in config", path.Join(d, "config"))) {
 			return
 		}
 		t.Errorf("unexpected error: %s", err)
@@ -80,13 +93,22 @@ func TestInvalidSpecRight(t *testing.T) {
 }
 
 func TestOpenNonexist(t *testing.T) {
-	c := NewCopy("/tmp/hopefully/nonexistent/repo", ValidSpec, ValidSpec, nil, func(string, ...interface{}) {})
-	err := c.Run()
+	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
 	if err != nil {
-		if strings.Contains(err.Error(), "error opening datastore at /tmp/hopefully/nonexistent/repo: mkdir /tmp/hopefully/nonexistent/repo/blocks: no such file or directory") {
+		t.Fatalf(err.Error())
+	}
+
+	p := path.Join(d, "hopefully/nonexistent/repo")
+	expect := fmt.Sprintf("error opening datastore at %s: mkdir %s: no such file or directory", p, path.Join(p, "blocks"))
+
+	c := NewCopy(p, ValidSpec, ValidSpec, nil, func(string, ...interface{}) {})
+	err = c.Run()
+	if err != nil {
+		if strings.Contains(err.Error(), expect) {
 			return
 		}
 		t.Errorf("unexpected error: %s", err)
+		t.Errorf("expected        : %s", expect)
 	}
 
 	t.Errorf("expected error")

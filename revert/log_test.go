@@ -1,16 +1,17 @@
 package revert_test
 
 import (
-	"github.com/ipfs/ipfs-ds-convert/revert"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 	"testing"
+
+	"github.com/ipfs/ipfs-ds-convert/revert"
 )
 
 func TestNewActionLogger(t *testing.T) {
-	d, err := ioutil.TempDir("/tmp", "ds-convert-test-")
+	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +38,7 @@ func TestNewActionLogger(t *testing.T) {
 }
 
 func TestLog(t *testing.T) {
-	d, err := ioutil.TempDir("/tmp", "ds-convert-test-")
+	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatal(err)
 	}

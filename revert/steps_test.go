@@ -9,14 +9,14 @@ import (
 )
 
 func TestLoadNonexistentLog(t *testing.T) {
-	_, err := loadLog("/tmp/non/existent/path")
+	_, err := loadLog(path.Join(os.TempDir(), "non/existent/path"))
 	if !os.IsNotExist(err) {
 		t.Errorf("unexpected error %s, expected no such file or directory", err)
 	}
 }
 
 func TestLoadInvalidLog(t *testing.T) {
-	dname, _ := ioutil.TempDir("/tmp", "ds-convert-test-")
+	dname, _ := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
 	_ = ioutil.WriteFile(path.Join(dname, ConvertLog), []byte("not a json\n"), 0600)
 
 	_, err := loadLog(dname)

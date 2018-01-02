@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"math/rand"
 
-	repo "gx/ipfs/QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo/go-ipfs/repo"
-	fsrepo "gx/ipfs/QmPWMdMnyNDhjRz1y5f5LhqmwzojJsB3tJipb5cwTzmxNo/go-ipfs/repo/fsrepo"
+	repo "gx/ipfs/QmdY9E5hA3pzMDW7w7gKEoioeDyvno3KnVwcvv3X3zEVVA/go-ipfs/repo"
+	fsrepo "gx/ipfs/QmdY9E5hA3pzMDW7w7gKEoioeDyvno3KnVwcvv3X3zEVVA/go-ipfs/repo/fsrepo"
 
 	"bytes"
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
+	ds "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore"
 )
 
 func OpenRepo(repoPath string) (repo.Repo, error) {

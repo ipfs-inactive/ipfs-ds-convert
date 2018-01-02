@@ -11,11 +11,11 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/strategy"
-
 	"github.com/ipfs/ipfs-ds-convert/revert"
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
+
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	ds "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore"
+	dsq "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore/query"
 )
 
 type Copy struct {
