@@ -32,7 +32,7 @@ func TestNewActionLogger(t *testing.T) {
 	}
 
 	_, err = revert.NewActionLogger(path.Join(d, "non/existent/path"))
-	if !strings.Contains(err.Error(), "/non/existent/path/convertlog: no such file or directory") {
+	if !strings.Contains(err.Error(), "/non/existent/path/convertlog:") {
 		t.Fatalf("expected error, got %s", err)
 	}
 }

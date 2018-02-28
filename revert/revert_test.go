@@ -119,7 +119,7 @@ func TestConvertNoKeepRevert(t *testing.T) {
 	}
 
 	err = revert.Revert(dir, true, false, false)
-	if !strings.Contains(err.Error(), "/convertlog: no such file or directory") {
+	if !strings.Contains(err.Error(), "/convertlog: ") {
 		t.Fatal(err)
 	}
 }
@@ -218,7 +218,12 @@ func TestRevertMkdirChecks(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"mkdir","arg":["`+path.Join(dir, revert.ConvertLog)+`"]}`), 0600)
+	l, err := revert.ActionMkdir.Line(path.Join(dir, revert.ConvertLog))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +239,12 @@ func TestRevertMoveChecks(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"mv","arg":["nonexistentfile","config"]}`), 0600)
+	l, err := revert.ActionMove.Line("nonexistentfile", "config")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,7 +254,12 @@ func TestRevertMoveChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"mv","arg":["`+path.Join(dir, repo.ConfigFile)+`","`+path.Join(dir, repo.ConfigFile)+`"]}`), 0600)
+	l, err = revert.ActionMove.Line(path.Join(dir, repo.ConfigFile), path.Join(dir, repo.ConfigFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
