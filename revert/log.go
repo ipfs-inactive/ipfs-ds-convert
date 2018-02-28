@@ -79,7 +79,7 @@ func (a *ActionLogger) CloseFinal() error {
 	return os.Remove(path.Join(a.repo, ConvertLog))
 }
 
-func (a *Action) Line(arg ...string) ([]byte, error) {
+func (a Action) Line(arg ...string) ([]byte, error) {
 	b, err := json.Marshal(map[string]interface{}{
 		"action": a,
 		"arg":    arg,

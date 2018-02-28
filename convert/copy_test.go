@@ -1,12 +1,12 @@
 package convert
 
 import (
-	"path"
-	"strings"
-	"testing"
-	"os"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
 
 	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
@@ -65,10 +65,11 @@ func TestInvalidSpecLeft(t *testing.T) {
 	c := NewCopy(d, InvalidSpec, ValidSpec, nil, func(string, ...interface{}) {})
 	err = c.Run()
 	if err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf("error validating datastore spec in %s: invalid type entry in config", path.Join(d, "datastore_spec"))) {
+		expect := fmt.Sprintf("error validating datastore spec in %s: invalid type entry in config", filepath.Join(d, "datastore_spec"))
+		if strings.Contains(err.Error(), expect) {
 			return
 		}
-		t.Errorf("unexpected error: %s", err)
+		t.Errorf("unexpected error: '%s', expected to get '%s'", err, expect)
 	}
 
 	t.Errorf("expected error")
@@ -83,7 +84,7 @@ func TestInvalidSpecRight(t *testing.T) {
 	c := NewCopy(d, ValidSpec, InvalidSpec, nil, func(string, ...interface{}) {})
 	err = c.Run()
 	if err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf("error validating datastore spec in %s: invalid type entry in config", path.Join(d, "config"))) {
+		if strings.Contains(err.Error(), fmt.Sprintf("error validating datastore spec in %s: invalid type entry in config", filepath.Join(d, "config"))) {
 			return
 		}
 		t.Errorf("unexpected error: %s", err)
@@ -98,8 +99,8 @@ func TestOpenNonexist(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	p := path.Join(d, "hopefully/nonexistent/repo")
-	expect := fmt.Sprintf("error opening datastore at %s: mkdir %s: no such file or directory", p, path.Join(p, "blocks"))
+	p := filepath.Join(d, "hopefully/nonexistent/repo")
+	expect := fmt.Sprintf("error opening datastore at %s: mkdir %s: ", p, filepath.Join(p, "blocks"))
 
 	c := NewCopy(p, ValidSpec, ValidSpec, nil, func(string, ...interface{}) {})
 	err = c.Run()
@@ -118,7 +119,7 @@ func TestVerifyKeysFail(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 100, 100)
 	defer _close(t)
 
-	testutil.PatchConfig(t, path.Join(dir, "config"), "../testfiles/singleSpec")
+	testutil.PatchConfig(t, filepath.Join(dir, "config"), "../testfiles/singleSpec")
 
 	c := NewCopy(dir, DefaultSpec, SingleSpec, nil, func(string, ...interface{}) {})
 	err := c.Run()

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -76,7 +77,7 @@ func TestNoSpec(t *testing.T) {
 		t.Fatal(fmt.Errorf("No error, expected no such file or directory"))
 	}
 
-	if !strings.Contains(err.Error(), "/datastore_spec: no such file or directory") {
+	if !strings.Contains(err.Error(), "datastore_spec: ") {
 		t.Fatal(fmt.Errorf("unexpected error: %s", err))
 	}
 }
@@ -97,7 +98,7 @@ func TestNoVersion(t *testing.T) {
 		t.Fatal(fmt.Errorf("No error, expected no such file or directory"))
 	}
 
-	if !strings.Contains(err.Error(), "/version: no such file or directory") {
+	if !strings.Contains(err.Error(), "version: ") {
 		t.Fatal(fmt.Errorf("unexpected error: %s", err))
 	}
 }
@@ -181,7 +182,7 @@ func TestNoConfig(t *testing.T) {
 		t.Fatal(fmt.Errorf("No error, expected no such file or directory"))
 	}
 
-	if !strings.Contains(err.Error(), "/config: no such file or directory") {
+	if !strings.Contains(err.Error(), "config: ") {
 		t.Fatal(fmt.Errorf("unexpected error: %s", err))
 	}
 }
@@ -266,6 +267,10 @@ func TestInvalidSpec(t *testing.T) {
 }
 
 func TestAbsolutePathSpec(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("the test uses unix paths in test vectors")
+	}
+
 	//Prepare repo
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)

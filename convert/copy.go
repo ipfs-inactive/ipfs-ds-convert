@@ -10,8 +10,8 @@ import (
 
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/ipfs/ipfs-ds-convert/repo"
-	"github.com/ipfs/ipfs-ds-convert/strategy"
 	"github.com/ipfs/ipfs-ds-convert/revert"
+	"github.com/ipfs/ipfs-ds-convert/strategy"
 
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 	ds "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore"
@@ -91,6 +91,11 @@ func (c *Copy) Verify() error {
 	Log.Println("Verifying key integrity")
 	verified, err := c.verifyKeys()
 	if err != nil {
+		err2 := c.closeDatastores()
+		if err2 != nil {
+			return err2
+		}
+
 		return err
 	}
 	Log.Printf("%d keys OK\n", verified)
