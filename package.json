@@ -78,6 +78,6 @@
   "license": "MIT",
   "name": "ipfs-ds-convert",
   "releaseCmd": "git commit -a -m \"gx publish $VERSION\"",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }
 
