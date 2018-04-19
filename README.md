@@ -45,18 +45,11 @@ $ go install
 
 ### Convert to Badger Datastore
 
-Manually update Datastore Spec section of the IPFS config file to use the following spec.
+Apply the Badger Datastore profile:
+
 
 ```
-"Spec": {
-      "child": {
-        "path": "badgerds",
-        "syncWrites": true,
-        "type": "badgerds"
-      },
-      "prefix": "badger.datastore",
-      "type": "measure"
-    }
+ipfs config profile apply badgerds
 ```
 
 Then, start the conversion using
