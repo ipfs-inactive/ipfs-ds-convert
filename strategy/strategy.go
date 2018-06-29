@@ -212,7 +212,7 @@ func addMissingParents(specA SimpleMounts, specB SimpleMounts, specAOpt SimpleMo
 				ti := specA.hasPrefixed(bestMatch)
 				if ti == -1 {
 					//TODO: fallback to copyAll
-					return nil, nil, fmt.Errorf("couldn't find %s in specA, parent of %s", bestMatch.prefix.String(), mountA)
+					return nil, nil, fmt.Errorf("couldn't find %s in specA, parent of %s", bestMatch.prefix.String(), mountA.prefix.String())
 				}
 				specAOpt = append(specAOpt, specA[ti])
 			}
