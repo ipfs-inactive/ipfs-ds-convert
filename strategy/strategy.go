@@ -6,7 +6,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
-	ds "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore"
+	ds "gx/ipfs/QmXRKBQA4wXP7xWbFiZsR1GP4HV6wMDQ1aWFxZZ4uBcPX9/go-datastore"
 )
 
 var ErrMountNotSimple = errors.New("mount entry is not simple, mount datastores can't be nested")
@@ -212,7 +212,7 @@ func addMissingParents(specA SimpleMounts, specB SimpleMounts, specAOpt SimpleMo
 				ti := specA.hasPrefixed(bestMatch)
 				if ti == -1 {
 					//TODO: fallback to copyAll
-					return nil, nil, fmt.Errorf("couldn't find %s in specA, parent of %s", bestMatch.prefix.String(), mountA)
+					return nil, nil, fmt.Errorf("couldn't find %s in specA, parent of %s", bestMatch.prefix.String(), mountA.prefix.String())
 				}
 				specAOpt = append(specAOpt, specA[ti])
 			}
