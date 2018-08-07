@@ -11,7 +11,7 @@ import (
 
 	"encoding/json"
 	"github.com/ipfs/ipfs-ds-convert/config"
-	lock "gx/ipfs/QmVUAoR89E6KDBJmsfRVkAoBMEfgVfy8rRmvzf4y9rWp1d/go4-lock"
+	lock "gx/ipfs/QmYzCZUe9CBDkyPNPcRNqXQK8KKhtUfXvc88PkFujAEJPe/go-fs-lock"
 	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
 	"io/ioutil"
 )
@@ -33,7 +33,7 @@ func Revert(repoPath string, force bool, fixSpec bool, cleanupMode bool) (err er
 		force: force,
 	}
 
-	unlock, err := lock.Lock(filepath.Join(p.repo, repo.LockFile))
+	unlock, err := lock.Lock(p.repo, repo.LockFile)
 	if err != nil {
 		return err
 	}
