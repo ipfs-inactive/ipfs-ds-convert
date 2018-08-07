@@ -3,7 +3,6 @@ package revert_test
 import (
 	"io/ioutil"
 	"path"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -12,7 +11,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/revert"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
-	lock "gx/ipfs/QmVUAoR89E6KDBJmsfRVkAoBMEfgVfy8rRmvzf4y9rWp1d/go4-lock"
+	lock "gx/ipfs/QmYzCZUe9CBDkyPNPcRNqXQK8KKhtUfXvc88PkFujAEJPe/go-fs-lock"
 )
 
 func TestBasicConvertRevert(t *testing.T) {
@@ -93,7 +92,7 @@ func TestConvertRevertLocked(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	unlock, err := lock.Lock(filepath.Join(dir, "repo.lock"))
+	unlock, err := lock.Lock(dir, "repo.lock")
 	if err != nil {
 		t.Fatal(err)
 	}

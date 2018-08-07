@@ -9,16 +9,10 @@ import (
 
 	conf "github.com/ipfs/ipfs-ds-convert/config"
 
-	madns "gx/ipfs/QmQMRYmPn77CKRFf4YFjX3M5e6uw6DFAgsQffCX6mwZ4mA/go-multiaddr-dns"
-	maddr "gx/ipfs/QmWWQ2Txc2c6tqjsBpzg5Ar652cHPGNsQQp2SejkNmkUMb/go-multiaddr"
-	config "gx/ipfs/QmcKwjeebv5SX3VFUGDFa4BNMYhy14RRaCzQP7JN3UQDpB/go-ipfs/repo/config"
-	fsrepo "gx/ipfs/QmcKwjeebv5SX3VFUGDFa4BNMYhy14RRaCzQP7JN3UQDpB/go-ipfs/repo/fsrepo"
+	_ "gx/ipfs/QmfXU2MhWoegxHoeMd3A2ytL2P6CY4FfqGWc23LTNWBwZt/go-multiaddr-dns"
+	config "gx/ipfs/QmebqVUQQqQFhg74FtQFszUJo22Vpr3e8qBAkvvV4ho9HH/go-ipfs/repo/config"
+	fsrepo "gx/ipfs/QmebqVUQQqQFhg74FtQFszUJo22Vpr3e8qBAkvvV4ho9HH/go-ipfs/repo/fsrepo"
 )
-
-//Hack
-func init() {
-	maddr.Protocols = append(maddr.Protocols, madns.DnsaddrProtocol)
-}
 
 func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {
 	conf, err := config.Init(os.Stdout, 1024)

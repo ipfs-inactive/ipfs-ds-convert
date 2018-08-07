@@ -12,7 +12,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/revert"
 	"github.com/ipfs/ipfs-ds-convert/strategy"
 
-	lock "gx/ipfs/QmVUAoR89E6KDBJmsfRVkAoBMEfgVfy8rRmvzf4y9rWp1d/go4-lock"
+	lock "gx/ipfs/QmYzCZUe9CBDkyPNPcRNqXQK8KKhtUfXvc88PkFujAEJPe/go-fs-lock"
 )
 
 var Log = logging.New(os.Stderr, "convert ", logging.LstdFlags)
@@ -40,7 +40,7 @@ func Convert(repoPath string, keepBackup bool) error {
 		return err
 	}
 
-	unlock, err := lock.Lock(filepath.Join(c.path, repo.LockFile))
+	unlock, err := lock.Lock(c.path, repo.LockFile)
 	if err != nil {
 		return err
 	}

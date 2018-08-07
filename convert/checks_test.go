@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -15,7 +14,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/revert"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
-	lock "gx/ipfs/QmVUAoR89E6KDBJmsfRVkAoBMEfgVfy8rRmvzf4y9rWp1d/go4-lock"
+	lock "gx/ipfs/QmYzCZUe9CBDkyPNPcRNqXQK8KKhtUfXvc88PkFujAEJPe/go-fs-lock"
 )
 
 func TestInvalidRepoVersion(t *testing.T) {
@@ -44,7 +43,7 @@ func TestLockedRepo(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	unlock, err := lock.Lock(filepath.Join(dir, "repo.lock"))
+	unlock, err := lock.Lock(dir, "repo.lock")
 	if err != nil {
 		t.Fatal(err)
 	}
