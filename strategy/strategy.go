@@ -5,8 +5,8 @@ import (
 
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
-	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
-	ds "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore"
+	ds "github.com/ipfs/go-datastore"
+	errors "github.com/pkg/errors"
 )
 
 var ErrMountNotSimple = errors.New("mount entry is not simple, mount datastores can't be nested")

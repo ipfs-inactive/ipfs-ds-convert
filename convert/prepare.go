@@ -11,7 +11,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
-	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	"github.com/pkg/errors"
 )
 
 func (c *Conversion) checkRepoVersion() error {

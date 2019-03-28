@@ -11,16 +11,16 @@ import (
 	"syscall"
 	"time"
 
-	measure "gx/ipfs/QmPMRquZA1WiRMQ5ZE2V1kHtnPaq2X5Qtz7Wgwwo2tjLyS/go-ds-measure"
-	flatfs "gx/ipfs/Qmc1ExJkrEUesbvRNHq6g3bJ2km7K4XffcC2bvwdpfGYDx/go-ds-flatfs"
+	flatfs "github.com/ipfs/go-ds-flatfs"
+	measure "github.com/ipfs/go-ds-measure"
 
-	ds "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore"
-	mount "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore/mount"
+	ds "github.com/ipfs/go-datastore"
+	mount "github.com/ipfs/go-datastore/mount"
 
-	retry "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore/retrystore"
-	badgerds "gx/ipfs/QmQoiqmV9gAKEQAELqeGACQwXyDeijE6fq7ARhirPMX2T2/go-ds-badger"
-	levelds "gx/ipfs/Qmb4NghN5y3uGjiZCQWU6g1ZWRVmFCykLmByqxEVi7px1d/go-ds-leveldb"
-	ldbopts "gx/ipfs/QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g/goleveldb/leveldb/opt"
+	retry "github.com/ipfs/go-datastore/retrystore"
+	badgerds "github.com/ipfs/go-ds-badger"
+	levelds "github.com/ipfs/go-ds-leveldb"
+	ldbopts "github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 //TODO: extract and use fsrepo from go-ipfs

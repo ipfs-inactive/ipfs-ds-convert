@@ -5,7 +5,7 @@ import (
 
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
-	ds "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore"
+	ds "github.com/ipfs/go-datastore"
 )
 
 type Spec map[string]interface{}

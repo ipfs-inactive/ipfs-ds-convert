@@ -11,7 +11,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/revert"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
-	lock "gx/ipfs/QmYzCZUe9CBDkyPNPcRNqXQK8KKhtUfXvc88PkFujAEJPe/go-fs-lock"
+	lock "github.com/ipfs/go-fs-lock"
 )
 
 func TestBasicConvertRevert(t *testing.T) {

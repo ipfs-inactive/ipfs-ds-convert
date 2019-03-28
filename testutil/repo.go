@@ -9,9 +9,9 @@ import (
 
 	conf "github.com/ipfs/ipfs-ds-convert/config"
 
-	_ "gx/ipfs/QmfXU2MhWoegxHoeMd3A2ytL2P6CY4FfqGWc23LTNWBwZt/go-multiaddr-dns"
-	config "gx/ipfs/QmebqVUQQqQFhg74FtQFszUJo22Vpr3e8qBAkvvV4ho9HH/go-ipfs/repo/config"
-	fsrepo "gx/ipfs/QmebqVUQQqQFhg74FtQFszUJo22Vpr3e8qBAkvvV4ho9HH/go-ipfs/repo/fsrepo"
+	config "github.com/ipfs/go-ipfs/repo/config"
+	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
+	_ "github.com/multiformats/go-multiaddr-dns"
 )
 
 func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {

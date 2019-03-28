@@ -9,7 +9,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/revert"
 	homedir "github.com/mitchellh/go-homedir"
 
-	cli "gx/ipfs/QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K/cli"
+	cli "github.com/codegangsta/cli"
 )
 
 const (

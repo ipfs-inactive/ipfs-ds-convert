@@ -10,9 +10,9 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
 	"encoding/json"
+	lock "github.com/ipfs/go-fs-lock"
 	"github.com/ipfs/ipfs-ds-convert/config"
-	lock "gx/ipfs/QmYzCZUe9CBDkyPNPcRNqXQK8KKhtUfXvc88PkFujAEJPe/go-fs-lock"
-	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	"github.com/pkg/errors"
 	"io/ioutil"
 )
 
