@@ -35,10 +35,7 @@ TODO:
 These instructions assume that go has been installed as described [here](https://github.com/ipfs/go-ipfs#install-go).
 
 ```
-$ go get -u github.com/ipfs/ipfs-ds-convert
-$ cd $GOPATH/src/github.com/ipfs/ipfs-ds-convert/
-$ make
-$ go install
+$ GO111MODULE=on go get github.com/ipfs/ipfs-ds-convert@latest
 ```
 
 ## Usage

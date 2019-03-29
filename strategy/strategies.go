@@ -5,7 +5,7 @@ import (
 
 	"github.com/ipfs/ipfs-ds-convert/config"
 
-	"gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	"github.com/pkg/errors"
 )
 
 type Strategy interface {

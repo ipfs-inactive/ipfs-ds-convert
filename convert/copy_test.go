@@ -11,7 +11,7 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/repo"
 	"github.com/ipfs/ipfs-ds-convert/testutil"
 
-	ds "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore"
+	ds "github.com/ipfs/go-datastore"
 )
 
 var (

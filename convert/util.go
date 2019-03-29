@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	errors "github.com/pkg/errors"
 )
 
 func (c *Conversion) addStep(format string, args ...interface{}) {
