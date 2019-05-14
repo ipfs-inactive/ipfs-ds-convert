@@ -7,12 +7,29 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ipfs/go-ipfs/plugin/loader"
+
 	conf "github.com/ipfs/ipfs-ds-convert/config"
 
-	config "github.com/ipfs/go-ipfs/repo/config"
+	config "github.com/ipfs/go-ipfs-config"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	_ "github.com/multiformats/go-multiaddr-dns"
 )
+
+func init() {
+	// Datastores are (by default preloaded) plugins
+
+	pl, err := loader.NewPluginLoader("")
+	if err != nil {
+		panic(err)
+	}
+	if err := pl.Initialize(); err != nil {
+		panic(err)
+	}
+	if err := pl.Inject(); err != nil {
+		panic(err)
+	}
+}
 
 func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {
 	conf, err := config.Init(os.Stdout, 1024)

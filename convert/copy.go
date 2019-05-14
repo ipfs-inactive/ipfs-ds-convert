@@ -197,10 +197,7 @@ func CopyKeys(fromDs repo.Datastore, toDs repo.Datastore) error {
 		curBatch.Put(ds.RawKey(entry.Key), val)
 		curEntries++
 
-		bval, ok := val.([]byte)
-		if ok {
-			curSize += len(bval)
-		}
+		curSize += len(val)
 
 		if curEntries == maxBatchEntries || curSize >= maxBatchSize {
 			err := curBatch.Commit()
