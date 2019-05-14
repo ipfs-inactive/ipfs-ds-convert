@@ -27,7 +27,6 @@ import (
 
 type Datastore interface {
 	ds.Batching
-	io.Closer
 }
 
 type Retry struct {

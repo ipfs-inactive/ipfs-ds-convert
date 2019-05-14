@@ -85,7 +85,7 @@ func Verify(prefix string, n int, seed int64, r repo.Repo) error {
 			return err
 		}
 
-		if !bytes.Equal(dataBytes, val.([]byte)) {
+		if !bytes.Equal(dataBytes, val) {
 			return fmt.Errorf("Non-matching data for key %s", k)
 		}
 	}
