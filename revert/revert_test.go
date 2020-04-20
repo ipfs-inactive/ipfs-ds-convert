@@ -99,7 +99,7 @@ func TestConvertRevertLocked(t *testing.T) {
 	defer unlock.Close()
 
 	err = revert.Revert(dir, true, false, false)
-	if !strings.Contains(err.Error(), "already locked") {
+	if !strings.Contains(err.Error(), "lock is already held") {
 		t.Fatal(err)
 	}
 }

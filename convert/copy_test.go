@@ -132,7 +132,7 @@ func TestVerifyKeysFail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = r.Delete(ds.NewKey("/blocks/NotARandomKey"))
+	err = r.Delete(ds.NewKey("/blocks/NOTARANDOMKEY"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +143,7 @@ func TestVerifyKeysFail(t *testing.T) {
 	}
 
 	err = c.Verify()
-	if err.Error() != "Key /blocks/NotARandomKey was not present in new datastore" {
+	if err.Error() != "Key /blocks/NOTARANDOMKEY was not present in new datastore" {
 		t.Fatal(err)
 	}
 }

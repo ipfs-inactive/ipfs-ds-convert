@@ -55,7 +55,7 @@ func TestLockedRepo(t *testing.T) {
 		t.Fatal(fmt.Errorf("No error, expected invalid repo version"))
 	}
 
-	if !strings.Contains(err.Error(), "already locked") {
+	if !strings.Contains(err.Error(), "lock is already held") {
 		t.Fatal(fmt.Errorf("unexpected error: %s", err))
 	}
 }
