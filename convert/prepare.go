@@ -25,7 +25,7 @@ func (c *Conversion) checkRepoVersion() error {
 		return err
 	}
 
-	if version != repo.SuppertedRepoVersion {
+	if version != repo.SupportedRepoVersion {
 		return fmt.Errorf("unsupported fsrepo version: %d", version)
 	}
 

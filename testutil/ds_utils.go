@@ -11,9 +11,11 @@ import (
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 
 	"bytes"
+
 	ds "github.com/ipfs/go-datastore"
 )
 
+// OpenRepo opens a repo.
 func OpenRepo(repoPath string) (repo.Repo, error) {
 	return fsrepo.Open(repoPath)
 }
@@ -24,6 +26,7 @@ func getSeed() int64 {
 	return int64(binary.LittleEndian.Uint64(b))
 }
 
+// InsertRandomKeys puts random keys in a repo.
 func InsertRandomKeys(prefix string, n int, r repo.Repo) (int64, error) {
 	seed := getSeed()
 	rnd := rand.New(rand.NewSource(seed))
@@ -57,7 +60,7 @@ func InsertRandomKeys(prefix string, n int, r repo.Repo) (int64, error) {
 		}
 	}
 
-	err = batch.Put(ds.NewKey(fmt.Sprintf("/%s%s", prefix, "NotARandomKey")), []byte("data"))
+	err = batch.Put(ds.NewKey(fmt.Sprintf("/%s%s", prefix, "NOTARANDOMKEY")), []byte("data"))
 	if err != nil {
 		return 0, err
 	}
@@ -70,6 +73,7 @@ func InsertRandomKeys(prefix string, n int, r repo.Repo) (int64, error) {
 	return seed, nil
 }
 
+// Verify checks that keys in the repository look as expected.
 func Verify(prefix string, n int, seed int64, r repo.Repo) error {
 	rnd := rand.New(rand.NewSource(seed))
 
@@ -86,7 +90,7 @@ func Verify(prefix string, n int, seed int64, r repo.Repo) error {
 		}
 
 		if !bytes.Equal(dataBytes, val) {
-			return fmt.Errorf("Non-matching data for key %s", k)
+			return fmt.Errorf("non-matching data for key %s", k)
 		}
 	}
 

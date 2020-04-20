@@ -13,7 +13,6 @@ import (
 
 	config "github.com/ipfs/go-ipfs-config"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
-	_ "github.com/multiformats/go-multiaddr-dns"
 )
 
 func init() {
@@ -31,8 +30,9 @@ func init() {
 	}
 }
 
+// NewTestRepo creates a new repo for testing.
 func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *testing.T)) {
-	conf, err := config.Init(os.Stdout, 1024)
+	conf, err := config.Init(os.Stdout, 2048)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,6 +63,8 @@ func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *tes
 	}
 }
 
+// PatchConfig replaces the datastore configuration in an existing
+// configuration file.
 func PatchConfig(t *testing.T, configPath string, newSpecPath string) {
 	newSpec := make(map[string]interface{})
 	err := conf.Load(newSpecPath, &newSpec)
@@ -89,5 +91,8 @@ func PatchConfig(t *testing.T, configPath string, newSpecPath string) {
 	dsConfig["Spec"] = newSpec
 
 	b, err := json.MarshalIndent(repoConfig, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
 	ioutil.WriteFile(configPath, b, 0660)
 }
