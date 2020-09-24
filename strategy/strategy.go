@@ -17,16 +17,18 @@ var skipTypes = map[string]string{
 }
 
 var dsTypes = map[string]bool{
-	"flatfs":   true,
-	"levelds":  true,
-	"badgerds": true,
+	"flatfs":    true,
+	"levelds":   true,
+	"badgerds":  true,
+	"badger2ds": true,
 }
 
 //datastors that have one directory inside IPFS repo
 var simpleTypes = map[string]bool{
-	"flatfs":   true,
-	"levelds":  true,
-	"badgerds": true,
+	"flatfs":    true,
+	"levelds":   true,
+	"badgerds":  true,
+	"badger2ds": true,
 }
 
 func NewStrategy(fromSpecIn, toSpecIn map[string]interface{}) (Strategy, error) {

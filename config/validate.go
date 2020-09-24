@@ -19,6 +19,7 @@ var validators = map[string]func(*validatorContext, map[string]interface{}) erro
 
 func init() {
 	validators["badgerds"] = badgerdsValidator
+	validators["badger2ds"] = badger2dsValidator
 	validators["flatfs"] = flatfsValidator
 	validators["levelds"] = leveldsValidator
 	validators["log"] = logValidator
@@ -122,6 +123,15 @@ func leveldsValidator(ctx *validatorContext, dsConfiguration map[string]interfac
 }
 
 func badgerdsValidator(ctx *validatorContext, dsConfiguration map[string]interface{}) error {
+	err := checkPath(ctx, dsConfiguration["path"])
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func badger2dsValidator(ctx *validatorContext, dsConfiguration map[string]interface{}) error {
 	err := checkPath(ctx, dsConfiguration["path"])
 	if err != nil {
 		return err

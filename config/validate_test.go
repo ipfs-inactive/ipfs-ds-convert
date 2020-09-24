@@ -41,6 +41,16 @@ var (
 					"compression": "none",
 				},
 			},
+			map[string]interface{}{
+				"mountpoint": "/other2",
+				"type":       "measure",
+				"prefix":     "badger2.datastore",
+				"child": map[string]interface{}{
+					"type":        "badger2ds",
+					"path":        "badger2Datastore",
+					"compression": "none",
+				},
+			},
 		},
 	}
 
@@ -58,6 +68,11 @@ var (
 
 	InvalidBadgerdsPathSpec = map[string]interface{}{
 		"type":        "badgerds",
+		"compression": "none",
+	}
+
+	InvalidBadger2dsPathSpec = map[string]interface{}{
+		"type":        "badger2ds",
 		"compression": "none",
 	}
 
@@ -167,14 +182,17 @@ func TestValidate(t *testing.T) {
 
 	sort.Strings(dirs)
 
-	if dirs[0] != "badgerDatastore" {
-		t.Errorf(`dirs[0] != "badgerDatastore" got %s `, dirs[0])
+	if dirs[0] != "badger2Datastore" {
+		t.Errorf(`dirs[0] != "badger2Datastore" got %s `, dirs[0])
 	}
-	if dirs[1] != "blocks" {
-		t.Errorf(`dirs[0] != "blocks" got %s `, dirs[1])
+	if dirs[1] != "badgerDatastore" {
+		t.Errorf(`dirs[0] != "badgerDatastore" got %s `, dirs[1])
 	}
-	if dirs[2] != "levelDatastore" {
-		t.Errorf(`dirs[0] != "levelDatastore" got %s `, dirs[2])
+	if dirs[2] != "blocks" {
+		t.Errorf(`dirs[0] != "blocks" got %s `, dirs[2])
+	}
+	if dirs[3] != "levelDatastore" {
+		t.Errorf(`dirs[0] != "levelDatastore" got %s `, dirs[3])
 	}
 }
 
@@ -216,6 +234,18 @@ func TestInvalidFlatfsPathSpec(t *testing.T) {
 
 func TestInvalidBadgerdsPathSpec(t *testing.T) {
 	_, err := Validate(InvalidBadgerdsPathSpec, false)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid 'path' type in datastore") {
+			return
+		}
+		t.Errorf("unexpected error: %s", err)
+	}
+
+	t.Errorf("expected error")
+}
+
+func TestInvalidBadger2dsPathSpec(t *testing.T) {
+	_, err := Validate(InvalidBadger2dsPathSpec, false)
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid 'path' type in datastore") {
 			return
