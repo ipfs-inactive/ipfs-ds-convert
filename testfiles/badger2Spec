@@ -1,0 +1,25 @@
+{
+  "mounts": [
+    {
+      "child": {
+        "path": "blocks",
+        "shardFunc": "/repo/flatfs/shard/v1/next-to-last/2",
+        "sync": true,
+        "type": "flatfs"
+      },
+      "mountpoint": "/blocks",
+      "prefix": "flatfs.datastore",
+      "type": "measure"
+    },
+    {
+      "child": {
+        "path": "badger2store",
+        "type": "badger2ds"
+      },
+      "mountpoint": "/",
+      "prefix": "badger2db.datastore",
+      "type": "measure"
+    }
+  ],
+  "type": "mount"
+}

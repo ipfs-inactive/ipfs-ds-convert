@@ -6,5 +6,5 @@ const (
 	SpecsFile  = "datastore_spec"
 
 	SupportedRepoVersion = 10
-	ToolVersion          = "0.5.0"
+	ToolVersion          = "0.6.0"
 )

@@ -122,6 +122,27 @@ var (
 			strategy: `{"from":{"mounts":[{"mountpoint":"/blocks","path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","sync":true,"type":"flatfs"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/blocks","path":"blocks","type":"badgerds"}],"type":"mount"},"type":"copy"}`,
 		},
 		{
+			//changed /blocks, rest untouched
+			baseSpec: basicSpec,
+			destSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/blocks",
+						"type":       "badger2ds",
+						"path":       "blocks",
+					},
+					map[string]interface{}{
+						"mountpoint":  "/",
+						"type":        "levelds",
+						"path":        "levelDatastore",
+						"compression": "none",
+					},
+				},
+			},
+			strategy: `{"from":{"mounts":[{"mountpoint":"/blocks","path":"blocks","shardFunc":"/repo/flatfs/shard/v1/next-to-last/2","sync":true,"type":"flatfs"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/blocks","path":"blocks","type":"badger2ds"}],"type":"mount"},"type":"copy"}`,
+		},
+		{
 			//adds /foo mount, needs to copy [/,/foo]
 			baseSpec: basicSpec,
 			destSpec: map[string]interface{}{
@@ -148,6 +169,34 @@ var (
 				},
 			},
 			strategy: `{"from":{"mounts":[{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/foo","path":"foo","type":"badgerds"},{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"type":"copy"}`,
+		},
+		{
+			//adds /foo mount, needs to copy [/,/foo]
+			baseSpec: basicSpec,
+			destSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/blocks",
+						"type":       "flatfs",
+						"path":       "blocks",
+						"sync":       true,
+						"shardFunc":  "/repo/flatfs/shard/v1/next-to-last/2",
+					},
+					map[string]interface{}{
+						"mountpoint": "/foo",
+						"type":       "badger2ds",
+						"path":       "foo",
+					},
+					map[string]interface{}{
+						"mountpoint":  "/",
+						"type":        "levelds",
+						"path":        "levelDatastore",
+						"compression": "none",
+					},
+				},
+			},
+			strategy: `{"from":{"mounts":[{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/foo","path":"foo","type":"badger2ds"},{"compression":"none","mountpoint":"/","path":"levelDatastore","type":"levelds"}],"type":"mount"},"type":"copy"}`,
 		},
 		{
 			//has single / mount, needs to copy [/,/blocks]
@@ -221,6 +270,61 @@ var (
 			strategy: `{"from":{"mounts":[{"mountpoint":"/c","path":"dsc","type":"badgerds"},{"mountpoint":"/b","path":"dsb","type":"badgerds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/d","path":"dsc","type":"badgerds"},{"compression":"none","mountpoint":"/b","path":"dsb","type":"levelds"},{"mountpoint":"/","path":"ds","type":"badgerds"}],"type":"mount"},"type":"copy"}`,
 		},
 		{
+			//skippable spec from testfiles
+			baseSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/a",
+						"type":       "badger2ds",
+						"path":       "dsa",
+					},
+					map[string]interface{}{
+						"mountpoint": "/b",
+						"type":       "badger2ds",
+						"path":       "dsb",
+					},
+					map[string]interface{}{
+						"mountpoint": "/c",
+						"type":       "badger2ds",
+						"path":       "dsc",
+					},
+					map[string]interface{}{
+						"mountpoint": "/",
+						"type":       "badger2ds",
+						"path":       "ds",
+					},
+				},
+			},
+			destSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/a",
+						"type":       "badger2ds",
+						"path":       "dsa",
+					},
+					map[string]interface{}{
+						"mountpoint":  "/b",
+						"type":        "levelds",
+						"path":        "dsb",
+						"compression": "none",
+					},
+					map[string]interface{}{
+						"mountpoint": "/",
+						"type":       "badger2ds",
+						"path":       "ds",
+					},
+					map[string]interface{}{
+						"mountpoint": "/d",
+						"type":       "badger2ds",
+						"path":       "dsc",
+					},
+				},
+			},
+			strategy: `{"from":{"mounts":[{"mountpoint":"/c","path":"dsc","type":"badger2ds"},{"mountpoint":"/b","path":"dsb","type":"badger2ds"},{"mountpoint":"/","path":"ds","type":"badger2ds"}],"type":"mount"},"to":{"mounts":[{"mountpoint":"/d","path":"dsc","type":"badger2ds"},{"compression":"none","mountpoint":"/b","path":"dsb","type":"levelds"},{"mountpoint":"/","path":"ds","type":"badger2ds"}],"type":"mount"},"type":"copy"}`,
+		},
+		{
 			//from nested mount
 			baseSpec: map[string]interface{}{
 				"type": "mount",
@@ -275,6 +379,67 @@ var (
 					map[string]interface{}{
 						"mountpoint": "/d",
 						"type":       "badgerds",
+						"path":       "dsc",
+					},
+				},
+			},
+			err: "parsing old spec: mount entry is not simple, mount datastores can't be nested",
+		},
+		{
+			//from nested mount
+			baseSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/a",
+						"type":       "badger2ds",
+						"path":       "dsa",
+					},
+					map[string]interface{}{
+						"mountpoint": "/b",
+						"type":       "badger2ds",
+						"path":       "dsb",
+					},
+					map[string]interface{}{
+						"type":       "mount",
+						"mountpoint": "/c",
+						"mounts": []interface{}{
+							map[string]interface{}{
+								"mountpoint": "/a",
+								"type":       "badger2ds",
+								"path":       "dsc",
+							},
+							map[string]interface{}{
+								"mountpoint": "/",
+								"type":       "badger2ds",
+								"path":       "ds",
+							},
+						},
+					},
+				},
+			},
+			destSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/a",
+						"type":       "badger2ds",
+						"path":       "dsa",
+					},
+					map[string]interface{}{
+						"mountpoint":  "/b",
+						"type":        "levelds",
+						"path":        "dsb",
+						"compression": "none",
+					},
+					map[string]interface{}{
+						"mountpoint": "/",
+						"type":       "badger2ds",
+						"path":       "ds",
+					},
+					map[string]interface{}{
+						"mountpoint": "/d",
+						"type":       "badger2ds",
 						"path":       "dsc",
 					},
 				},
@@ -392,6 +557,36 @@ var (
 					map[string]interface{}{
 						"mountpoint": "/foo",
 						"type":       "badgerds",
+						"path":       "foo",
+					},
+				},
+			},
+			err: "adding missing to src spec: couldn't find best match for specA /bar",
+		},
+		{
+			//missing dest point
+			baseSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/foo",
+						"type":       "badger2ds",
+						"path":       "foo",
+					},
+					map[string]interface{}{
+						"mountpoint":  "/bar",
+						"type":        "levelds",
+						"path":        "bar",
+						"compression": "none",
+					},
+				},
+			},
+			destSpec: map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/foo",
+						"type":       "badger2ds",
 						"path":       "foo",
 					},
 				},

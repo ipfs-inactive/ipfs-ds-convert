@@ -108,13 +108,14 @@ var datastores map[string]ConfigFromMap
 
 func init() {
 	datastores = map[string]ConfigFromMap{
-		"mount":    MountDatastoreConfig,
-		"flatfs":   FlatfsDatastoreConfig,
-		"levelds":  LeveldsDatastoreConfig,
-		"badgerds": BadgerdsDatastoreConfig,
-		"mem":      MemDatastoreConfig,
-		"log":      LogDatastoreConfig,
-		"measure":  MeasureDatastoreConfig,
+		"mount":     MountDatastoreConfig,
+		"flatfs":    FlatfsDatastoreConfig,
+		"levelds":   LeveldsDatastoreConfig,
+		"badgerds":  BadgerdsDatastoreConfig,
+		"badger2ds": Badger2dsDatastoreConfig,
+		"mem":       MemDatastoreConfig,
+		"log":       LogDatastoreConfig,
+		"measure":   MeasureDatastoreConfig,
 	}
 }
 
