@@ -1,0 +1,6 @@
+*.out
+*.coverprofile
+*.test
+*~
+
+coverage.txt
