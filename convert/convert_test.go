@@ -12,6 +12,61 @@ import (
 	testutil "github.com/ipfs/ipfs-ds-convert/testutil"
 )
 
+func TestConvertAll(t *testing.T) {
+	const (
+		levelSpec = "../testfiles/defaultSpec"
+		keys      = 300
+		blocks    = 300
+	)
+
+	// Each test case specifies a datastore spec to intiialize.  That datastore
+	// is then converted to a leveldb datastore, and then converted back.
+	//
+	// TODO: enable testing on mem datastore.
+	testCases := []struct {
+		name     string
+		specPath string
+	}{
+		{name: "badger", specPath: "../testfiles/badgerSpec"},
+		{name: "badger2", specPath: "../testfiles/badger2Spec"},
+		{name: "flatfs", specPath: "../testfiles/flatfsSpec"},
+		{name: "leveldb", specPath: levelSpec},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			spec := make(map[string]interface{})
+			err := config.Load(tc.specPath, &spec)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Create datastore for spec in testcase
+			dir, _close, s1, s2 := testutil.PrepareTestSpec(t, keys, blocks, spec)
+			defer _close(t)
+
+			// Patch config to leveldb datastore and convert
+			testutil.PatchConfig(t, path.Join(dir, "config"), levelSpec)
+			t.Log("Converting datastore from", tc.name, "to leveldb")
+			err = convert.Convert(dir, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Patch config back to original datastore and convert
+			testutil.PatchConfig(t, path.Join(dir, "config"), tc.specPath)
+			t.Log("Converting datastore from leveldb to", tc.name)
+			err = convert.Convert(dir, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Verify keys in final resulting datastore.
+			testutil.FinishTest(t, dir, s1, s2, keys, blocks)
+		})
+	}
+}
+
 func TestBasicConvert(t *testing.T) {
 	//Prepare repo
 	dir, _close, s1, s2 := testutil.PrepareTest(t, 3000, 3000)

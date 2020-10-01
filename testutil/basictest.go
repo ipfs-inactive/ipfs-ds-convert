@@ -6,7 +6,11 @@ import (
 )
 
 func PrepareTest(t *testing.T, keys, blocks int) (string, func(t *testing.T), int64, int64) {
-	dir, _close := NewTestRepo(t, nil)
+	return PrepareTestSpec(t, keys, blocks, nil)
+}
+
+func PrepareTestSpec(t *testing.T, keys, blocks int, spec map[string]interface{}) (string, func(t *testing.T), int64, int64) {
+	dir, _close := NewTestRepo(t, spec)
 
 	r, err := OpenRepo(dir)
 	if err != nil {

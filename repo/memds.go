@@ -20,8 +20,3 @@ func (c *memDatastoreConfig) DiskSpec() DiskSpec {
 func (c *memDatastoreConfig) Create(string) (Datastore, error) {
 	return ds.NewMapDatastore(), nil
 }
-
-type measureDatastoreConfig struct {
-	child  DatastoreConfig
-	prefix string
-}

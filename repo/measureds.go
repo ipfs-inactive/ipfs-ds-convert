@@ -6,6 +6,11 @@ import (
 	measure "github.com/ipfs/go-ds-measure"
 )
 
+type measureDatastoreConfig struct {
+	child  DatastoreConfig
+	prefix string
+}
+
 // MeasureDatastoreConfig returns a measure DatastoreConfig from a spec
 func MeasureDatastoreConfig(params map[string]interface{}) (DatastoreConfig, error) {
 	childField, ok := params["child"].(map[string]interface{})
