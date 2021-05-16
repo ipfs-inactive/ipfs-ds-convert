@@ -349,7 +349,7 @@ func (c *Copy) verifyKeys() (n int, err error) {
 		}
 
 		if !has {
-			return n, fmt.Errorf("Key %s was not present in new datastore", entry.Key)
+			return n, fmt.Errorf("key %s was not present in new datastore", entry.Key)
 		}
 
 		n++
