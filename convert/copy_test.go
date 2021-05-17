@@ -122,8 +122,7 @@ func TestVerifyKeysFail(t *testing.T) {
 	testutil.PatchConfig(t, filepath.Join(dir, "config"), "../testfiles/singleSpec")
 
 	c := NewCopy(dir, DefaultSpec, SingleSpec, nil, func(string, ...interface{}) {})
-	err := c.Run()
-	if err != nil {
+	if err := c.Run(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -132,18 +131,15 @@ func TestVerifyKeysFail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = r.Delete(ds.NewKey("/blocks/NOTARANDOMKEY"))
-	if err != nil {
+	if err := r.Delete(ds.NewKey("/blocks/NOTARANDOMKEY")); err != nil {
 		t.Fatal(err)
 	}
 
-	err = r.Close()
-	if err != nil {
+	if err := r.Close(); err != nil {
 		t.Fatal(err)
 	}
 
-	err = c.Verify()
-	if err.Error() != "Key /blocks/NOTARANDOMKEY was not present in new datastore" {
+	if err := c.Verify(); err.Error() != "key /blocks/NOTARANDOMKEY was not present in new datastore" {
 		t.Fatal(err)
 	}
 }
