@@ -3,7 +3,6 @@ package testutil
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -46,7 +45,7 @@ func NewTestRepo(t *testing.T, spec map[string]interface{}) (string, func(t *tes
 		conf.Datastore.Spec = spec
 	}
 
-	repoRoot, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
+	repoRoot, err := os.MkdirTemp(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,5 +93,5 @@ func PatchConfig(t *testing.T, configPath string, newSpecPath string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ioutil.WriteFile(configPath, b, 0660)
+	os.WriteFile(configPath, b, 0660)
 }

@@ -2,7 +2,6 @@ package convert
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -57,7 +56,7 @@ var (
 )
 
 func TestInvalidSpecLeft(t *testing.T) {
-	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
+	d, err := os.MkdirTemp(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -76,7 +75,7 @@ func TestInvalidSpecLeft(t *testing.T) {
 }
 
 func TestInvalidSpecRight(t *testing.T) {
-	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
+	d, err := os.MkdirTemp(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -94,7 +93,7 @@ func TestInvalidSpecRight(t *testing.T) {
 }
 
 func TestOpenNonexist(t *testing.T) {
-	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
+	d, err := os.MkdirTemp(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

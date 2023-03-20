@@ -1,7 +1,7 @@
 package revert_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 	"testing"
@@ -136,7 +136,7 @@ func TestBasicConvertRevertUnknownStep(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"unknownactiontype","arg":[]}`), 0600)
+	os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"unknownactiontype","arg":[]}`), 0600)
 
 	err = revert.Revert(dir, true, false, false)
 	if !strings.Contains(err.Error(), "unknown revert step 'unknownactiontype'") {
@@ -176,35 +176,35 @@ func TestBasicConvertRevertInvalidArgs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionRemove+`","arg":[]}`), 0600)
+	os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionRemove+`","arg":[]}`), 0600)
 
 	err = revert.Revert(dir, true, false, false)
 	if !strings.Contains(err.Error(), "revert remove: arg count 0 != 1") {
 		t.Fatal(err)
 	}
 
-	ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionMove+`","arg":[]}`), 0600)
+	os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionMove+`","arg":[]}`), 0600)
 
 	err = revert.Revert(dir, true, false, false)
 	if !strings.Contains(err.Error(), "revert move: arg count 0 != 2") {
 		t.Fatal(err)
 	}
 
-	ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionMkdir+`","arg":[]}`), 0600)
+	os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionMkdir+`","arg":[]}`), 0600)
 
 	err = revert.Revert(dir, true, false, false)
 	if !strings.Contains(err.Error(), "revert mkdir: arg count 0 != 1") {
 		t.Fatal(err)
 	}
 
-	ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionCleanup+`","arg":["a"]}`), 0600)
+	os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionCleanup+`","arg":["a"]}`), 0600)
 
 	err = revert.Revert(dir, true, false, true)
 	if !strings.Contains(err.Error(), "cannot cleanup after failed conversion") {
 		t.Fatal(err)
 	}
 
-	ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionCleanup+`","arg":[]}`+"\n"+`{"action":"`+revert.ActionDone+`","arg":[]}`), 0600)
+	os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(`{"action":"`+revert.ActionCleanup+`","arg":[]}`+"\n"+`{"action":"`+revert.ActionDone+`","arg":[]}`), 0600)
 
 	err = revert.Revert(dir, true, false, true)
 	if !strings.Contains(err.Error(), "cleanup arg count 0 != 1") {
@@ -222,7 +222,7 @@ func TestRevertMkdirChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
+	err = os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -243,7 +243,7 @@ func TestRevertMoveChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
+	err = os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -258,7 +258,7 @@ func TestRevertMoveChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
+	err = os.WriteFile(path.Join(dir, revert.ConvertLog), []byte(l), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
