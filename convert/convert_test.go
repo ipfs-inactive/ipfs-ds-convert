@@ -47,7 +47,7 @@ func TestLossyConvert(t *testing.T) {
 	t.Errorf("expected error 'adding missing to src spec: couldn't find best match for specA /'")
 }
 
-//should cover noop case in convert.go
+// should cover noop case in convert.go
 func TestNoopConvert(t *testing.T) {
 	//Prepare repo
 	dir, _close, s1, s2 := testutil.PrepareTest(t, 3000, 3000)

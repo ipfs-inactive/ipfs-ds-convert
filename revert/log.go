@@ -29,8 +29,8 @@ type ActionLogger struct {
 	file *os.File
 }
 
-//NewActionLogger creates revert action logger which logs actions needed to
-//revert conversion steps
+// NewActionLogger creates revert action logger which logs actions needed to
+// revert conversion steps
 func NewActionLogger(repoPath string) (*ActionLogger, error) {
 	if _, err := os.Stat(path.Join(repoPath, ConvertLog)); !os.IsNotExist(err) {
 		return nil, fmt.Errorf("Log file %s already exists, you may want to run revert", path.Join(repoPath, ConvertLog))

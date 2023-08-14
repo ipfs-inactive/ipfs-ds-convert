@@ -2,7 +2,6 @@ package convert
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -15,7 +14,7 @@ import (
 )
 
 func (c *Conversion) checkRepoVersion() error {
-	vstr, err := ioutil.ReadFile(filepath.Join(c.path, "version"))
+	vstr, err := os.ReadFile(filepath.Join(c.path, "version"))
 	if err != nil {
 		return err
 	}

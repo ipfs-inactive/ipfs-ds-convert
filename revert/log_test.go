@@ -1,7 +1,6 @@
 package revert_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -11,12 +10,12 @@ import (
 )
 
 func TestNewActionLogger(t *testing.T) {
-	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
+	d, err := os.MkdirTemp(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(path.Join(d, revert.ConvertLog), []byte{}, 0664)
+	err = os.WriteFile(path.Join(d, revert.ConvertLog), []byte{}, 0664)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +37,7 @@ func TestNewActionLogger(t *testing.T) {
 }
 
 func TestLog(t *testing.T) {
-	d, err := ioutil.TempDir(os.TempDir(), "ds-convert-test-")
+	d, err := os.MkdirTemp(os.TempDir(), "ds-convert-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +53,7 @@ func TestLog(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	b, err := ioutil.ReadFile(path.Join(d, revert.ConvertLog))
+	b, err := os.ReadFile(path.Join(d, revert.ConvertLog))
 	if err != nil {
 		t.Fatal(err)
 	}
