@@ -4,8 +4,9 @@ import (
 	"path"
 	"testing"
 
-	"github.com/ipfs/ipfs-ds-convert/testutil"
 	"os"
+
+	"github.com/ipfs/ipfs-ds-convert/testutil"
 )
 
 func TestBasicConvert(t *testing.T) {

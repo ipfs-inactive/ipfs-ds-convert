@@ -22,7 +22,7 @@ var dsTypes = map[string]bool{
 	"badgerds": true,
 }
 
-//datastors that have one directory inside IPFS repo
+// datastors that have one directory inside IPFS repo
 var simpleTypes = map[string]bool{
 	"flatfs":   true,
 	"levelds":  true,

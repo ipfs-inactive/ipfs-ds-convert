@@ -2,7 +2,6 @@ package convert_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -22,7 +21,7 @@ func TestInvalidRepoVersion(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, "version"), []byte("147258369"), 0664)
+	err := os.WriteFile(path.Join(dir, "version"), []byte("147258369"), 0664)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +106,7 @@ func TestInvalidVersion(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, "version"), []byte("a"), 0600)
+	err := os.WriteFile(path.Join(dir, "version"), []byte("a"), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +127,7 @@ func TestInvalidSpecJson(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, repo.SpecsFile), []byte("}"), 0600)
+	err := os.WriteFile(path.Join(dir, repo.SpecsFile), []byte("}"), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +148,7 @@ func TestInvalidSpecFile(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, repo.SpecsFile), []byte("{}"), 0600)
+	err := os.WriteFile(path.Join(dir, repo.SpecsFile), []byte("{}"), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +190,7 @@ func TestInvalidConfigJson(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, repo.ConfigFile), []byte("}"), 0600)
+	err := os.WriteFile(path.Join(dir, repo.ConfigFile), []byte("}"), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,7 +211,7 @@ func TestInvalidConfigFile(t *testing.T) {
 	dir, _close, _, _ := testutil.PrepareTest(t, 10, 10)
 	defer _close(t)
 
-	err := ioutil.WriteFile(path.Join(dir, repo.ConfigFile), []byte("{}"), 0600)
+	err := os.WriteFile(path.Join(dir, repo.ConfigFile), []byte("{}"), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,7 +230,7 @@ func TestInvalidConfigFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(path.Join(dir, repo.ConfigFile), []byte(`{"Datastore":{}}`), 0600)
+	err = os.WriteFile(path.Join(dir, repo.ConfigFile), []byte(`{"Datastore":{}}`), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}

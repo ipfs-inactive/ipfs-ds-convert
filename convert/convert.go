@@ -2,7 +2,6 @@ package convert
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -135,7 +134,7 @@ func (c *Conversion) saveNewSpec(backup bool) (err error) {
 		return err
 	}
 
-	err = ioutil.WriteFile(filepath.Join(c.path, repo.SpecsFile), []byte(toDiskId), 0660)
+	err = os.WriteFile(filepath.Join(c.path, repo.SpecsFile), []byte(toDiskId), 0660)
 	if err != nil {
 		return err
 	}
@@ -151,12 +150,12 @@ func (c *Conversion) saveNewSpec(backup bool) (err error) {
 }
 
 func (c *Conversion) backupSpec() error {
-	backupFile, err := ioutil.TempFile(c.path, "datastore_spec_backup")
+	backupFile, err := os.CreateTemp(c.path, "datastore_spec_backup")
 	if err != nil {
 		return err
 	}
 
-	specData, err := ioutil.ReadFile(filepath.Join(c.path, repo.SpecsFile))
+	specData, err := os.ReadFile(filepath.Join(c.path, repo.SpecsFile))
 	if err != nil {
 		return err
 	}

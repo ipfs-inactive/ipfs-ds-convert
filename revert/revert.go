@@ -10,10 +10,10 @@ import (
 	"github.com/ipfs/ipfs-ds-convert/repo"
 
 	"encoding/json"
+
 	lock "github.com/ipfs/go-fs-lock"
 	"github.com/ipfs/ipfs-ds-convert/config"
 	"github.com/pkg/errors"
-	"io/ioutil"
 )
 
 var Log = logging.New(os.Stderr, "revert ", logging.LstdFlags)
@@ -222,7 +222,7 @@ func fixConfig(repoPath string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(filepath.Join(repoPath, repo.ConfigFile), []byte(confBytes), 0660)
+	err = os.WriteFile(filepath.Join(repoPath, repo.ConfigFile), []byte(confBytes), 0660)
 	if err != nil {
 		return err
 	}
