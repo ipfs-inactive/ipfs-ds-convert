@@ -1,6 +1,6 @@
 module github.com/ipfs/ipfs-ds-convert
 
-go 1.21
+go 1.22
 
 require (
 	github.com/ipfs/go-datastore v0.4.6
