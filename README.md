@@ -1,3 +1,13 @@
+> [!WARNING]
+>
+> # ⚠️  `ipfs-ds-convert` is no longer maintained
+>
+> This tool was not updated since 2021  and go-ipfs v0.8.0 and repo version 11.
+> Badgerv1 is considered unstable and is deprecated.
+> 
+> Modern [Kubo](https://github.com/ipfs/kubo) supports various datastores via plugin system,
+> and instead of conversion tool like this, users are advised to create a new repository.
+
 ipfs-ds-convert
 ==================
 
