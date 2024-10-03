@@ -2,11 +2,11 @@ package config
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 )
 
 func Load(path string, out *map[string]interface{}) error {
-	cfgbytes, err := ioutil.ReadFile(path)
+	cfgbytes, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}

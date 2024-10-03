@@ -65,7 +65,7 @@ func (m *SimpleMounts) hasMatching(searched SimpleMount) bool {
 	return false
 }
 
-//filter removes matching mounts from this mounts
+// filter removes matching mounts from this mounts
 func (m *SimpleMounts) filter(filter SimpleMounts) SimpleMounts {
 	out := make([]SimpleMount, 0, len(*m))
 

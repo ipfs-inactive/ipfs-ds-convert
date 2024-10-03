@@ -3,7 +3,6 @@ package convert
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -131,7 +130,7 @@ func (c *Copy) openDatastores() (err error) {
 	}
 	c.logStep("open datastore at %s", c.path)
 
-	c.newDsDir, err = ioutil.TempDir(c.path, "ds-convert")
+	c.newDsDir, err = os.MkdirTemp(c.path, "ds-convert")
 	if err != nil {
 		return errors.Wrapf(err, "error creating temp datastore at %s", c.path)
 	}
@@ -231,7 +230,7 @@ func CopyKeys(fromDs repo.Datastore, toDs repo.Datastore) error {
 }
 
 func (c *Copy) swapDatastores() (err error) {
-	c.oldDsDir, err = ioutil.TempDir(c.path, "ds-convert-old")
+	c.oldDsDir, err = os.MkdirTemp(c.path, "ds-convert-old")
 	if err != nil {
 		return errors.Wrapf(err, "error creating temp datastore at %s", c.path)
 	}
